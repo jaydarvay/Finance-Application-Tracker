@@ -16,7 +16,7 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 
 ## Getting started
 
-- Open the live tracker using the link above.
+- Open the application tracker using the link above.
 - Explore its features.
 - Delete the example applications and start adding your own.
 - Save the page to your bookmarks (for easy access). Your changes save automatically in your browser on your computer.
