@@ -1,6 +1,6 @@
 # Finance Application Tracker
 
-A simple browser-based tool for keeping track of job applications, deadlines, interview stages, and preparation notes.
+A simple browser-based tool for keeping track of job applications, deadlines, interview preparation notes, and documents used (CV, Cover Letter) for every application you do.
 
 **[Open the application tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)**
 
