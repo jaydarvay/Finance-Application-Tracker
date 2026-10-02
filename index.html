@@ -60,6 +60,10 @@
       display: block;
     }
 
+    #trackerView > header {
+      margin-bottom: 30px;
+    }
+
     header {
       display: grid;
       grid-template-columns: minmax(260px, 1fr) auto;
@@ -156,6 +160,34 @@
       font-size: 28px;
       line-height: 1;
       color: var(--ink);
+    }
+
+    .job-type-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 28px;
+    }
+
+    .job-type-tab {
+      min-height: 38px;
+      padding: 8px 16px;
+      border: 1px solid #087d8a;
+      border-radius: 999px;
+      background: #087d8a;
+      color: #fff;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .job-type-tab:hover {
+      filter: brightness(0.94);
+    }
+
+    .job-type-tab.active {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: #fff;
     }
 
     .controls {
@@ -322,6 +354,50 @@
 
     tr:last-child td {
       border-bottom: 0;
+    }
+
+    .category-group-row th {
+      padding: 0;
+      border-left: 0;
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .category-group-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 36px;
+      padding: 6px 12px;
+      background: var(--ink);
+      color: #fff;
+      text-align: left;
+      font-weight: 750;
+    }
+
+    .category-group-toggle:hover {
+      background: #24334a;
+    }
+
+    .category-group-symbol {
+      width: 18px;
+      flex: 0 0 18px;
+      font-size: 20px;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .category-group-name {
+      text-transform: none;
+    }
+
+    .category-group-count {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.78;
+      text-transform: none;
     }
 
     .company {
@@ -508,6 +584,32 @@
       color: #176340;
     }
 
+    .urgency-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .urgency-pill.soon {
+      background: #fff1d9;
+      color: #8a4b00;
+    }
+
+    .urgency-pill.very-soon {
+      background: #ffe8e8;
+      color: #9c2626;
+    }
+
+    .urgency-pill.overdue {
+      background: #8f1717;
+      color: #fff;
+    }
+
     .notes {
       position: static;
       max-width: 260px;
@@ -637,8 +739,18 @@
       white-space: nowrap;
     }
 
-    #closeBtn {
+    #dialogSaveBtn {
       margin-left: auto;
+    }
+
+    #closeBtn {
+      margin-left: 0;
+    }
+
+    .dialog-head .btn {
+      width: auto;
+      min-height: 36px;
+      padding: 0 12px;
     }
 
     .dialog-status-group {
@@ -1109,6 +1221,10 @@
     }
 
     @media (max-width: 680px) {
+      .dialog-head {
+        flex-wrap: wrap;
+      }
+
       .dialog-status-group {
         order: 3;
         flex-basis: 100%;
@@ -1125,6 +1241,16 @@
       .form-grid,
       .detail-grid {
         grid-template-columns: 1fr;
+      }
+
+      .job-type-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 6px;
+      }
+
+      .job-type-tab {
+        flex: 0 0 auto;
       }
 
       .stage-grid {
@@ -1172,6 +1298,16 @@
       </div>
     </header>
 
+    <nav class="job-type-tabs" id="jobTypeTabs" aria-label="Application type">
+      <button class="job-type-tab" type="button" data-job-type="Summer Internships" aria-pressed="false">Summer Internships</button>
+      <button class="job-type-tab" type="button" data-job-type="Spring Weeks" aria-pressed="false">Spring Weeks</button>
+      <button class="job-type-tab" type="button" data-job-type="Off-Cycle Internships" aria-pressed="false">Off-Cycle Internships</button>
+      <button class="job-type-tab" type="button" data-job-type="Industrial Placements" aria-pressed="false">Industrial Placements</button>
+      <button class="job-type-tab active" type="button" data-job-type="Graduate Programmes" aria-pressed="true">Graduate Programmes</button>
+      <button class="job-type-tab" type="button" data-job-type="Pre-Uni" aria-pressed="false">Pre-Uni</button>
+      <button class="job-type-tab" type="button" data-job-type="Events" aria-pressed="false">Events</button>
+    </nav>
+
     <section class="controls" aria-label="Filters">
       <div class="field">
         <label for="searchInput">Search</label>
@@ -1182,7 +1318,7 @@
         <select id="sortSelect">
           <option value="deadline">Next Deadline</option>
           <option value="roleAZ">Role A–Z</option>
-          <option value="firmTypeAZ">Firm Type A–Z</option>
+          <option value="firmTypeAZ">Company Category A–Z</option>
           <option value="appliedNewest">Newest applications</option>
           <option value="appliedOldest">Oldest applications</option>
           <option value="updated">Recently updated</option>
@@ -1192,8 +1328,10 @@
         <label for="statusFilter">Status</label>
         <select id="statusFilter">
           <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="due">Due in &lt;7 days</option>
+          <option value="active">Active (Hide Rejections)</option>
+          <option value="dueSoon">Due soon (4-7 days)</option>
+          <option value="dueVerySoon">Due very soon (0-3 days)</option>
+          <option value="overdue">Overdue</option>
           <option value="offers">Offers</option>
           <option value="rejections">Rejections</option>
         </select>
@@ -1232,7 +1370,7 @@
     <header>
       <div>
         <h1>Outcome Notes</h1>
-        <p class="subtitle">Notes for applications marked as offer or rejected.</p>
+        <p class="subtitle" id="outcomeSubtitle">Offers and rejections for Graduate Programmes.</p>
       </div>
     </header>
 
@@ -1308,6 +1446,7 @@
           <label class="dialog-status-choice"><input type="radio" name="applicationStatus" value="Offer"><span>Offer</span></label>
           <label class="dialog-status-choice"><input type="radio" name="applicationStatus" value="Rejected"><span>Rejected</span></label>
         </div>
+        <button class="btn" id="dialogSaveBtn" type="submit" form="applicationForm">Save</button>
         <button class="icon-btn" id="closeBtn" type="button" title="Close">x</button>
       </div>
       <form id="applicationForm">
@@ -1331,7 +1470,33 @@
           </div>
           <div class="field">
             <label for="categoryInput">Company Category</label>
-            <input id="categoryInput" placeholder="Investment Bank, FinTech, Trading Firm">
+            <select id="categoryInput" required>
+              <option value="" disabled selected>Select a company category</option>
+              <option value="Bulge Bracket">Bulge Bracket</option>
+              <option value="Elite Boutique">Elite Boutique</option>
+              <option value="Middle Market">Middle Market</option>
+              <option value="Buy-Side">Buy-Side</option>
+              <option value="Asset Management">Asset Management</option>
+              <option value="Big 4">Big 4</option>
+              <option value="Consulting">Consulting</option>
+              <option value="Trading and Quant">Trading and Quant</option>
+              <option value="Real Estate">Real Estate</option>
+              <option value="Pensions and Insurance">Pensions and Insurance</option>
+              <option value="Accounting and Audit">Accounting and Audit</option>
+              <option value="Miscellaneous">Miscellaneous</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="jobTypeInput">Job Type</label>
+            <select id="jobTypeInput" required>
+              <option value="Summer Internships">Summer Internships</option>
+              <option value="Spring Weeks">Spring Weeks</option>
+              <option value="Off-Cycle Internships">Off-Cycle Internships</option>
+              <option value="Industrial Placements">Industrial Placements</option>
+              <option value="Graduate Programmes">Graduate Programmes</option>
+              <option value="Pre-Uni">Pre-Uni</option>
+              <option value="Events">Events</option>
+            </select>
           </div>
           <div class="field full">
             <label for="urlInput">Job Description Link</label>
@@ -1372,6 +1537,14 @@
     const stageStates = ["todo", "done"];
     const stageLabels = { todo: "To do", done: "Done" };
     const applicationStatuses = ["In progress", "Offer", "Rejected"];
+    const jobTypes = ["Summer Internships", "Spring Weeks", "Off-Cycle Internships", "Industrial Placements", "Graduate Programmes", "Pre-Uni", "Events"];
+    const companyCategories = ["Bulge Bracket", "Elite Boutique", "Middle Market", "Buy-Side", "Asset Management", "Big 4", "Consulting", "Trading and Quant", "Real Estate", "Pensions and Insurance", "Accounting and Audit", "Miscellaneous"];
+    const legacyCompanyCategoryMap = {
+      "asset manager": "Asset Management",
+      "investment bank": "Middle Market",
+      "private equity firm": "Buy-Side"
+    };
+    const collapsedCategoriesStorageKey = `${storageKey}-collapsed-company-categories`;
     const priorityRank = { High: 0, Medium: 1, Low: 2 };
     const sampleData = [
   {
@@ -1380,11 +1553,11 @@
     "role": "M&A Analyst",
     "deadline": "2026-10-08",
     "priority": "Medium",
-    "status": "Rejected",
+    "status": "In progress",
     "appliedAt": "2026-10-01",
     "companyCategory": "Bulge Bracket",
     "url": "",
-    "notes": "Rejections automatically go to the bottom",
+    "notes": "Add things you need to remember for the role. Salary, recruiter email, etc...",
     "roleNotes": "",
     "interviewNotes": "",
     "outcomeNotes": "",
@@ -1423,7 +1596,7 @@
     "priority": "Medium",
     "status": "Offer",
     "appliedAt": "2026-09-28",
-    "companyCategory": "Investment Bank",
+    "companyCategory": "Middle Market",
     "url": "https://www.linkedin.com/in/jaydarvay/",
     "notes": "Paste in the job description link, and it shows up as a hyperlink here.",
     "roleNotes": "",
@@ -1468,9 +1641,9 @@
     "priority": "High",
     "status": "In progress",
     "appliedAt": "2026-09-29",
-    "companyCategory": "Private Equity Firm",
-    "url": "",
-    "notes": "Add things you need to remember for the role. Salary, recruiter email, etc...",
+    "companyCategory": "Buy-Side",
+    "url": "https://www.linkedin.com/in/jaydarvay/",
+    "notes": "Example: Revise financial modelling basics for the technical interview. Use the job description link above to refresh the company values.",
     "roleNotes": "",
     "interviewNotes": "",
     "outcomeNotes": "",
@@ -1515,9 +1688,9 @@
     "priority": "Low",
     "status": "In progress",
     "appliedAt": "2026-09-22",
-    "companyCategory": "Asset Manager",
-    "url": "https://www.linkedin.com/in/jaydarvay/",
-    "notes": "Example: Revise financial modelling basics for the technical interview. Use the job description link above to refresh the company values.",
+    "companyCategory": "Asset Management",
+    "url": "",
+    "notes": "",
     "roleNotes": "",
     "interviewNotes": "",
     "outcomeNotes": "",
@@ -1551,6 +1724,52 @@
       }
     ],
     "updatedAt": 1790888557924
+  },
+  {
+    "id": "b0fa60ea-f881-4cf2-beba-9bcc3a060a44",
+    "company": "Example Real Estate",
+    "role": "Real Estate Graduate",
+    "deadline": "2026-10-09",
+    "priority": "Medium",
+    "status": "Rejected",
+    "appliedAt": "2026-10-02",
+    "companyCategory": "Buy-Side",
+    "jobType": "Graduate Programmes",
+    "url": "",
+    "notes": "Rejections automatically get moved to the bottom",
+    "roleNotes": "",
+    "interviewNotes": "",
+    "outcomeNotes": "Rejected before the final interview.",
+    "prepChecklist": [
+      {
+        "text": "Researched firm",
+        "done": false
+      },
+      {
+        "text": "Prepared answers",
+        "done": false
+      }
+    ],
+    "documents": {},
+    "stages": [
+      {
+        "name": "CV Screening",
+        "status": "done"
+      },
+      {
+        "name": "HireVue",
+        "status": "done"
+      },
+      {
+        "name": "Technical Interview",
+        "status": "done"
+      },
+      {
+        "name": "Final Interview",
+        "status": "todo"
+      }
+    ],
+    "updatedAt": 1790950800000
   }
 ];
 
@@ -1559,6 +1778,8 @@
     let detailId = null;
     let pendingAdditionalDocumentIndex = null;
     let activeView = "tracker";
+    let activeJobType = "Graduate Programmes";
+    let collapsedCategories = loadCollapsedCategories();
 
     const rows = document.querySelector("#applicationRows");
     const tableWrap = document.querySelector("#tableWrap");
@@ -1580,6 +1801,12 @@
     document.querySelector("#searchInput").addEventListener("input", render);
     document.querySelector("#statusFilter").addEventListener("change", render);
     document.querySelector("#sortSelect").addEventListener("change", render);
+    document.querySelector("#jobTypeTabs").addEventListener("click", event => {
+      const tab = event.target.closest("[data-job-type]");
+      if (!tab) return;
+      activeJobType = tab.dataset.jobType;
+      render();
+    });
     document.querySelector("#trackerNavBtn").addEventListener("click", () => showView("tracker"));
     document.querySelector("#outcomesNavBtn").addEventListener("click", () => showView("outcomes"));
     document.querySelector("#backToTrackerBtn").addEventListener("click", () => showView("tracker"));
@@ -1632,14 +1859,78 @@
 
     function loadApplications() {
       const saved = localStorage.getItem(storageKey);
-      if (!saved) return sampleData;
+      if (!saved) return sampleData.map(normalizeApplication);
       try {
         const parsed = JSON.parse(saved);
-        if (!Array.isArray(parsed)) return sampleData;
-        return parsed.map(normalizeApplication);
+        if (!Array.isArray(parsed)) return sampleData.map(normalizeApplication);
+        const normalized = parsed.map(normalizeApplication).map(migrateExampleNotes);
+        const changed = applyRequestedUpdates(normalized);
+        if (changed || normalized.some((app, index) => {
+          const savedApp = parsed[index] || {};
+          return app.companyCategory !== (savedApp.companyCategory || "Miscellaneous")
+            || app.notes !== (savedApp.notes || "")
+            || app.url !== (savedApp.url || "");
+        })) {
+          localStorage.setItem(storageKey, JSON.stringify(normalized));
+        }
+        return normalized;
       } catch {
-        return sampleData;
+        return sampleData.map(normalizeApplication);
       }
+    }
+
+
+    function applyRequestedUpdates(apps) {
+      let changed = false;
+      const goldman = apps.find(app => app.company === "Goldman Stanley");
+      if (goldman && goldman.status !== "In progress") {
+        goldman.status = "In progress";
+        changed = true;
+      }
+
+      const requested = sampleData.find(app => app.company === "Example Real Estate");
+      let example = apps.find(app => app.company === "Example Real Estate" && app.role === "Real Estate Graduate");
+      if (!example) {
+        example = normalizeApplication(requested);
+        apps.push(example);
+        changed = true;
+      } else {
+        const requiredFields = ["companyCategory", "jobType", "deadline", "status", "notes", "outcomeNotes", "stages"];
+        for (const field of requiredFields) {
+          const desired = field === "stages" ? JSON.stringify(requested[field]) : requested[field];
+          const current = field === "stages" ? JSON.stringify(example[field]) : example[field];
+          if (current !== desired) {
+            example[field] = field === "stages" ? requested[field].map(stage => ({ ...stage })) : desired;
+            changed = true;
+          }
+        }
+      }
+      return changed;
+    }
+
+    function normalizeCompanyCategory(category) {
+      const label = typeof category === "string" ? category.trim() : "";
+      const lowerLabel = label.toLowerCase();
+      if (legacyCompanyCategoryMap[lowerLabel]) return legacyCompanyCategoryMap[lowerLabel];
+      return companyCategories.find(option => option.toLowerCase() === lowerLabel) || "Miscellaneous";
+    }
+
+    function migrateExampleNotes(app) {
+      const reminder = "Add things you need to remember for the role. Salary, recruiter email, etc...";
+      const example = "Example: Revise financial modelling basics for the technical interview. Use the job description link above to refresh the company values.";
+      if (app.company === "Goldman Stanley" && app.role === "M&A Analyst" && app.notes === "Rejections automatically go to the bottom") {
+        app.notes = reminder;
+        app.url = "";
+      }
+      if (app.company === "Example Capital Partners" && app.role === "Private Equity Analyst" && app.notes === reminder) {
+        app.notes = example;
+        app.url = "https://www.linkedin.com/in/jaydarvay/";
+      }
+      if (app.company === "Example Asset Management" && app.role === "Investment Analyst" && app.notes === example) {
+        app.notes = "";
+        app.url = "";
+      }
+      return app;
     }
 
     function normalizeApplication(app) {
@@ -1652,7 +1943,8 @@
         priority: getUrgency(deadline),
         status: normalizeStatus(app.status),
         appliedAt: app.appliedAt || "",
-        companyCategory: app.companyCategory || "",
+        companyCategory: normalizeCompanyCategory(app.companyCategory),
+        jobType: jobTypes.includes(app.jobType) ? app.jobType : "Graduate Programmes",
         url: app.url || "",
         notes: ({
           "Do technical prep for interview - revise financial modelling basics, Excel skills etc.": "Add things you need to remember for the role.",
@@ -1679,11 +1971,54 @@
       localStorage.setItem(storageKey, JSON.stringify(applications));
     }
 
+    function loadCollapsedCategories() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(collapsedCategoriesStorageKey) || "[]");
+        return new Set(Array.isArray(saved) ? saved.map(normalizeCompanyCategory) : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function persistCollapsedCategories() {
+      localStorage.setItem(collapsedCategoriesStorageKey, JSON.stringify([...collapsedCategories]));
+    }
+
     function render() {
       applications = applications.map(normalizeApplication);
+      document.querySelectorAll(".job-type-tab").forEach(tab => {
+        const selected = tab.dataset.jobType === activeJobType;
+        tab.classList.toggle("active", selected);
+        tab.setAttribute("aria-pressed", String(selected));
+      });
       const filtered = getFilteredApplications();
       rows.innerHTML = "";
-      filtered.forEach(app => rows.appendChild(createRow(app)));
+      const groupedApplications = new Map();
+      filtered.forEach(app => {
+        const category = app.companyCategory || "Miscellaneous";
+        if (!groupedApplications.has(category)) groupedApplications.set(category, []);
+        groupedApplications.get(category).push(app);
+      });
+      const categories = [...groupedApplications.keys()].sort((a, b) => {
+        if (document.querySelector("#sortSelect").value === "firmTypeAZ") {
+          return a.localeCompare(b, undefined, { sensitivity: "base" });
+        }
+        const aIndex = companyCategories.indexOf(a);
+        const bIndex = companyCategories.indexOf(b);
+        if (aIndex !== -1 || bIndex !== -1) {
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return aIndex - bIndex;
+        }
+        return a.localeCompare(b, undefined, { sensitivity: "base" });
+      });
+      categories.forEach(category => {
+        const categoryApplications = groupedApplications.get(category);
+        rows.appendChild(createCategoryGroupRow(category, categoryApplications.length));
+        if (!collapsedCategories.has(category)) {
+          categoryApplications.forEach(app => rows.appendChild(createRow(app)));
+        }
+      });
       tableWrap.style.display = filtered.length ? "block" : "none";
       emptyState.classList.toggle("visible", !filtered.length);
       updateMetrics();
@@ -1703,16 +2038,21 @@
             app.role,
             app.status,
             app.companyCategory,
+            app.jobType,
             app.notes,
             app.roleNotes,
             app.interviewNotes,
             ...app.stages.map(stage => stage.name)
           ].join(" ").toLowerCase();
-          const dueSoon = app.deadline && daysUntil(app.deadline) < 7;
-          return (!search || text.includes(search))
+          const daysRemaining = app.deadline ? daysUntil(app.deadline) : null;
+          const activeApplication = app.status === "In progress";
+          return app.jobType === activeJobType
+            && (!search || text.includes(search))
             && (status === "all"
               || (status === "active" && (app.status === "In progress" || app.status === "Offer"))
-              || (status === "due" && app.status !== "Rejected" && dueSoon)
+              || (status === "dueSoon" && activeApplication && daysRemaining >= 4 && daysRemaining <= 7)
+              || (status === "dueVerySoon" && activeApplication && daysRemaining >= 0 && daysRemaining <= 3)
+              || (status === "overdue" && activeApplication && daysRemaining < 0)
               || (status === "offers" && app.status === "Offer")
               || (status === "rejections" && app.status === "Rejected"));
         })
@@ -1734,6 +2074,28 @@
         });
     }
 
+    function createCategoryGroupRow(category, count) {
+      const collapsed = collapsedCategories.has(category);
+      const tr = document.createElement("tr");
+      tr.className = "category-group-row";
+      tr.innerHTML = `
+        <th colspan="5">
+          <button class="category-group-toggle" type="button" data-category-toggle="${escapeAttribute(category)}" aria-expanded="${!collapsed}">
+            <span class="category-group-symbol" aria-hidden="true">${collapsed ? "+" : "−"}</span>
+            <span class="category-group-name">${escapeHtml(category)}</span>
+            <span class="category-group-count">${count} ${count === 1 ? "application" : "applications"}</span>
+          </button>
+        </th>
+      `;
+      tr.querySelector("[data-category-toggle]").addEventListener("click", () => {
+        if (collapsedCategories.has(category)) collapsedCategories.delete(category);
+        else collapsedCategories.add(category);
+        persistCollapsedCategories();
+        render();
+      });
+      return tr;
+    }
+
     function createRow(app) {
       const tr = document.createElement("tr");
       tr.className = app.status === "Rejected" ? "rejected-row" : "";
@@ -1744,7 +2106,7 @@
           <div class="role">${escapeHtml(app.role)}</div>
           <div class="tagline">
             <button class="pill status-pill ${statusClass(app.status)}" type="button" data-action="status">${escapeHtml(app.status)}</button>
-            ${app.companyCategory ? `<span class="pill category-pill">${escapeHtml(app.companyCategory)}</span>` : ""}
+            ${renderUrgencyWidget(app)}
           </div>
         </td>
         <td><div class="stage-grid"></div></td>
@@ -1834,8 +2196,9 @@
     }
 
     function updateMetrics() {
-      document.querySelector("#totalMetric").textContent = applications.length;
-      document.querySelector("#progressMetric").textContent = applications.filter(app => app.status === "In progress").length;
+      const currentTypeApplications = applications.filter(app => app.jobType === activeJobType);
+      document.querySelector("#totalMetric").textContent = currentTypeApplications.length;
+      document.querySelector("#progressMetric").textContent = currentTypeApplications.filter(app => app.status === "In progress").length;
     }
 
     function openEditor(id) {
@@ -1848,6 +2211,7 @@
         status: "In progress",
         appliedAt: getOffsetDate(0),
         companyCategory: "",
+        jobType: activeJobType,
         url: "",
         notes: "",
         stages: makeDefaultStages()
@@ -1862,7 +2226,8 @@
       const deadlineUnknown = document.querySelector("#deadlineUnknown");
       deadlineUnknown.checked = Boolean(editingId && !app.deadline);
       document.querySelector("#deadlineInput").disabled = deadlineUnknown.checked;
-      document.querySelector("#categoryInput").value = app.companyCategory;
+      document.querySelector("#categoryInput").value = app.companyCategory ? normalizeCompanyCategory(app.companyCategory) : "";
+      document.querySelector("#jobTypeInput").value = app.jobType || activeJobType;
       document.querySelector("#urlInput").value = app.url;
       document.querySelector("#notesInput").value = app.notes;
       renderStageEditor(app.stages);
@@ -1927,6 +2292,7 @@
         status: document.querySelector("input[name='applicationStatus']:checked").value,
         appliedAt: editingId ? applications.find(item => item.id === editingId)?.appliedAt : getOffsetDate(0),
         companyCategory: document.querySelector("#categoryInput").value.trim(),
+        jobType: document.querySelector("#jobTypeInput").value,
         url: document.querySelector("#urlInput").value.trim(),
         notes: document.querySelector("#notesInput").value.trim(),
         roleNotes: editingId ? applications.find(item => item.id === editingId)?.roleNotes : "",
@@ -1938,6 +2304,7 @@
         updatedAt: Date.now()
       });
 
+      activeJobType = app.jobType;
       if (editingId) {
         applications = applications.map(item => item.id === editingId ? app : item);
       } else {
@@ -1997,6 +2364,11 @@
     function openDetail(id) {
       detailId = id;
       showView("detail");
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
     }
 
     function renderDetail() {
@@ -2257,7 +2629,8 @@
 
     function renderOutcomes() {
       if (!outcomeList) return;
-      const outcomeApps = applications.filter(app => app.status === "Rejected" || app.status === "Offer");
+      const outcomeApps = applications.filter(app => app.jobType === activeJobType && (app.status === "Rejected" || app.status === "Offer"));
+      document.querySelector("#outcomeSubtitle").textContent = `Offers and rejections for ${activeJobType}.`;
       outcomeList.innerHTML = "";
       outcomeApps.forEach(app => outcomeList.appendChild(createOutcomeItem(app)));
       outcomeEmpty.classList.toggle("visible", !outcomeApps.length);
@@ -2341,6 +2714,15 @@
       if (days <= 3) return "High";
       if (days <= 7) return "Medium";
       return "Low";
+    }
+
+    function renderUrgencyWidget(app) {
+      if (!app.deadline || app.status === "Offer" || app.status === "Rejected") return "";
+      const days = daysUntil(app.deadline);
+      if (days < 0) return '<span class="urgency-pill overdue">Overdue</span>';
+      if (days <= 3) return '<span class="urgency-pill very-soon">Due very soon</span>';
+      if (days <= 7) return '<span class="urgency-pill soon">Due soon</span>';
+      return "";
     }
 
     function deadlineTime(value) {
