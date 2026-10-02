@@ -19,7 +19,7 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 - Open the application tracker using the link above.
 - Explore its features.
 - Delete the example applications and start adding your own.
-- Save the page to your bookmarks (for easy access). Your changes save automatically in your browser on your computer.
+- Save the link somewhere, or press "Add Bookmark To Favourites" (for easy access). Your changes save automatically in your browser on your computer.
 
 ## How your data is saved
 
