@@ -2,17 +2,17 @@
 
 A simple browser-based tool for keeping track of job applications, deadlines, interview stages, and preparation notes.
 
-**[Open the live tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)**
+**[Open the application tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)**
 
 Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 
 ## Features
 
-- Add and edit applications, deadlines, and interview stages.
-- Track application status: In progress, Offer, or Rejected.
-- Search, sort, and filter applications.
-- Keep role notes, interview notes, a preparation checklist, and documents.
-- Export a backup or import one later.
+Track applications: Record roles, deadlines, statuses, and interview stages.
+
+Find applications: Search by company, role, or any key word; filter by status or deadline; sort by deadline, role, or firm type.
+
+Prepare: Keep job description links, application documents used (CV, Cover Letter), notes and checklists for each application together in one place.
 
 ## Getting started
 
