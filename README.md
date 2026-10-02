@@ -8,11 +8,11 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 
 ## Features
 
-- Track applications: Record roles, deadlines, statuses, and interview stages.
+- **Track applications:** Record roles, deadlines, statuses, and interview stages.
 
-- Find applications: Search by company, role, or any key word; filter by status or deadline; sort by deadline, role, or firm type.
+- **Find applications:** Search by company, role, or any key word; filter by status or deadline; sort by deadline, role, or firm type.
 
-- Prepare: Keep job description links, application documents used (CV, Cover Letter), notes and checklists for each application together in one place.
+- **Prepare:** Keep job description links, application documents used (CV, Cover Letter), notes and checklists for each application together in one place.
 
 ## Getting started
 
