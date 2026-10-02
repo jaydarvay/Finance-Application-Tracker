@@ -1,0 +1,2378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finance Application Tracker</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --surface-2: #f4f6f8;
+      --ink: #142033;
+      --muted: #657286;
+      --line: #d7dee8;
+      --accent: #285f9f;
+      --accent-2: #527ca7;
+      --green: #168052;
+      --green-soft: #e9f7ef;
+      --green-line: #9bd0b2;
+      --red: #a94949;
+      --red-soft: #fbebeb;
+      --red-line: #e3b0b0;
+      --shadow: 0 14px 38px rgba(20, 32, 51, 0.08);
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding-bottom: 86px;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .shell {
+      width: min(1480px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 46px);
+      letter-spacing: 0;
+      line-height: 1.02;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 8px 22px rgba(20, 32, 51, 0.12);
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--accent);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .btn.warning {
+      background: #fff4ec;
+      color: #8a3d12;
+      border: 1px solid #f0c3a4;
+      box-shadow: none;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 28px;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 34.5% 16.5% 16.5% 22%;
+      gap: 14px;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .controls .metric-group {
+      display: flex;
+      gap: 14px;
+      width: 82%;
+      justify-self: end;
+    }
+
+    .controls .metric {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 10px 12px;
+      box-shadow: none;
+    }
+
+    .controls .metric span {
+      white-space: nowrap;
+    }
+
+    .controls .metric strong {
+      font-size: 24px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      align-content: start;
+    }
+
+    .deadline-unknown-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: none;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+
+    .deadline-unknown-option input {
+      width: 16px;
+      min-height: 16px;
+      margin: 0;
+      padding: 0;
+      accent-color: var(--accent);
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      min-height: 40px;
+      padding: 9px 10px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    #roleNotesInput,
+    #interviewNotesInput {
+      min-height: 120px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(30, 107, 124, 0.14);
+    }
+
+    .table-wrap {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .col-company {
+      width: 14%;
+    }
+
+    .col-stages {
+      width: 46%;
+    }
+
+    .col-deadline {
+      width: 11%;
+    }
+
+    .col-notes {
+      width: 16%;
+    }
+
+    .col-actions {
+      width: 13%;
+    }
+
+    th, td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th + th,
+    td + td {
+      border-left: 1px solid #e8edf3;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      padding-left: 12px;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+      padding-left: 12px;
+    }
+
+    th {
+      background: var(--surface-2);
+      color: #38465a;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .company {
+      min-width: 0;
+    }
+
+    .company strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .company-link {
+      display: inline;
+      padding: 0;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .company-link:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    tr.rejected-row .company-link,
+    tr.rejected-row .role {
+      text-decoration: line-through;
+    }
+
+    tr.rejected-row {
+      opacity: 0.72;
+    }
+
+    .role {
+      color: var(--ink);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .tagline {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #edf2f7;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .pill.high {
+      background: #ffe8e8;
+      color: #9c2626;
+    }
+
+    .pill.medium {
+      background: #fff1d9;
+      color: #8a4b00;
+    }
+
+    .pill.low {
+      background: #e6f4ec;
+      color: #176340;
+    }
+
+    .status-pill {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .status-pill:hover {
+      filter: brightness(0.97);
+    }
+
+    .status-in-progress {
+      background: #edf2f7;
+      color: #475569;
+    }
+
+    .status-offer {
+      background: #e6f4ec;
+      color: #176340;
+    }
+
+    .status-rejected {
+      background: #ffe8e8;
+      color: #9c2626;
+    }
+
+    .category-pill {
+      background: #dbeafe;
+      color: #1d5c99;
+    }
+
+    .stage-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(118px, 1fr));
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .stage {
+      min-height: 42px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 6px 8px;
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .stage span {
+      display: block;
+      color: inherit;
+      opacity: 0.76;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .stage strong {
+      display: block;
+      margin-top: 1px;
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.15;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stage.done {
+      border-color: var(--green-line);
+      background: var(--green-soft);
+      color: #315f43;
+    }
+
+    .stage.todo {
+      border-color: #cfd7e2;
+      background: #f4f6f8;
+      color: #526070;
+    }
+
+    .date {
+      min-width: 122px;
+      white-space: nowrap;
+      font-weight: 800;
+    }
+
+    .date-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #edf2f7;
+      color: #475569;
+      font-weight: 800;
+    }
+
+    .date-pill.high {
+      background: #ffe8e8;
+      color: #9c2626;
+    }
+
+    .date-pill.medium {
+      background: #fff1d9;
+      color: #8a4b00;
+    }
+
+    .date-pill.low {
+      background: #e6f4ec;
+      color: #176340;
+    }
+
+    .notes {
+      position: static;
+      max-width: 260px;
+      color: #4a5568;
+      font-size: 13px;
+      line-height: 1.35;
+      text-align: left;
+      vertical-align: top !important;
+      white-space: pre-wrap;
+    }
+
+    .notes-content {
+      color: #4a5568;
+      font-size: 13px;
+      line-height: 1.35;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+
+    .rejected-row .notes-content {
+      opacity: 0.72;
+    }
+
+    .notes a {
+      display: inline-block;
+      margin-bottom: 5px;
+      color: var(--accent);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .notes a:hover {
+      text-decoration: underline;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      justify-content: flex-end;
+      min-width: 0;
+    }
+
+    .actions .icon-btn {
+      width: auto;
+      min-width: 64px;
+      padding: 0 10px;
+      font-size: 0.9em;
+      white-space: nowrap;
+    }
+
+    .actions .icon-btn:hover {
+      text-decoration: underline;
+    }
+
+    .actions [data-action="detail"] {
+      min-height: 56px;
+      padding: 5px 10px;
+      line-height: 1.1;
+      white-space: normal;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .actions .delete-btn {
+      border-color: #e3b0b0;
+      background: #fff1f1;
+      color: #9c2626;
+    }
+
+    .empty {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+
+    .empty.visible {
+      display: block;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(12, 18, 28, 0.46);
+    }
+
+    .modal.open {
+      display: grid;
+    }
+
+    .dialog {
+      width: min(860px, 100%);
+      max-height: min(880px, calc(100vh - 36px));
+      overflow: auto;
+      background: var(--surface);
+      border-radius: 8px;
+      box-shadow: 0 28px 80px rgba(12, 18, 28, 0.28);
+    }
+
+    .dialog-head {
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      z-index: 2;
+    }
+
+    .dialog-head h2 {
+      margin: 0;
+      font-size: 20px;
+      white-space: nowrap;
+    }
+
+    #closeBtn {
+      margin-left: auto;
+    }
+
+    .dialog-status-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-left: 20px;
+    }
+
+    .dialog-status-choice {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .dialog-status-choice input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    .dialog-status-choice span {
+      display: block;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f4f6f8;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .dialog-status-choice input:checked + span {
+      border-color: #cbd8e8;
+      background: #eaf0f7;
+      color: #43536a;
+    }
+
+    .dialog-status-choice input[value="Offer"]:checked + span {
+      border-color: #a9d9bd;
+      background: #e7f5ec;
+      color: #176341;
+    }
+
+    .dialog-status-choice input[value="Rejected"]:checked + span {
+      border-color: #edc0c0;
+      background: #fff0f0;
+      color: #a34b4b;
+    }
+
+    .dialog-status-choice input:focus-visible + span {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    form {
+      padding: 16px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .stage-editor {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 6px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fafbfc;
+    }
+
+    .stage-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 124px 58px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stage-actions {
+      margin-top: 10px;
+    }
+
+    .remove-stage {
+      width: auto;
+      min-width: 58px;
+      padding: 0 8px;
+      background: #ffe8e8;
+      border-color: #e3b0b0;
+      color: #9c2626;
+      font-weight: 900;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .detail-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .detail-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .detail-title h1 {
+      margin-bottom: 4px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel.full {
+      grid-column: 1 / -1;
+    }
+
+    .panel.hidden {
+      display: none;
+    }
+
+    .panel.compact {
+      padding: 10px 12px;
+      box-shadow: none;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .document-row {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .document-card {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fafbfc;
+    }
+
+    .document-link {
+      color: var(--accent);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .document-link:hover {
+      text-decoration: underline;
+    }
+
+    .doc-action-btn {
+      min-height: 30px;
+      padding: 4px 9px;
+      font-size: 12px;
+      box-shadow: none;
+    }
+
+    .additional-documents-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .additional-document-heading {
+      margin-top: 14px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 8px;
+    }
+
+    .check-item,
+    .check-edit-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fafbfc;
+    }
+
+    .check-item input {
+      width: 18px;
+      min-height: 18px;
+    }
+
+    .check-item.done span {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .file-input-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .snapshot-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .snapshot-strip .pill,
+    .snapshot-strip .date-pill {
+      min-height: 24px;
+      font-size: 12px;
+    }
+
+    .snapshot-next {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .snapshot-notes {
+      flex-basis: 100%;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    #snapshotNotesInput {
+      min-height: 150px;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      color: #4a5568;
+      line-height: 1.4;
+      box-shadow: none;
+      resize: vertical;
+    }
+
+    #snapshotNotesInput:focus {
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .snapshot-link {
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .snapshot-link:hover {
+      text-decoration: underline;
+    }
+
+    .dashboard-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .dashboard-item {
+      display: grid;
+      grid-template-columns: minmax(240px, 1.15fr) minmax(220px, 0.9fr) 150px 92px;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .dashboard-item strong {
+      display: block;
+    }
+
+    .dashboard-item span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dashboard-item .pill,
+    .dashboard-item .flag-pill,
+    .dashboard-item .date-pill {
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .dashboard-item .category-pill {
+      color: #1d5c99;
+    }
+
+    .dashboard-item textarea {
+      min-height: 86px;
+    }
+
+    .dashboard-item.rejected {
+      opacity: 0.72;
+    }
+
+    .dashboard-item.rejected strong,
+    .dashboard-item.rejected .dashboard-role {
+      text-decoration: line-through;
+    }
+
+    .dashboard-company-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .dashboard-flags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .flag-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: #f1f4f8;
+      color: #526070;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .flag-pill.high {
+      background: #ffe8e8;
+      color: #9c2626;
+    }
+
+    .flag-pill.medium {
+      background: #fff1d9;
+      color: #8a4b00;
+    }
+
+    .flag-pill.low {
+      background: #e6f4ec;
+      color: #176340;
+    }
+
+    .flag-pill.alert {
+      background: #ffe8e8;
+      color: #9c2626;
+    }
+
+    .flag-pill.success {
+      background: #e6f4ec;
+      color: #176340;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      z-index: 8;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(128px, 1fr));
+      gap: 8px;
+      width: min(420px, calc(100% - 28px));
+      transform: translateX(-50%);
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 18px 50px rgba(20, 32, 51, 0.16);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-btn {
+      min-height: 42px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .nav-btn.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .hidden-file {
+      display: none;
+    }
+
+    @media (max-width: 1050px) {
+      header {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+      }
+
+      .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls .metric-group {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .dialog-status-group {
+        order: 3;
+        flex-basis: 100%;
+        margin-left: 0;
+      }
+
+      .shell {
+        width: min(100% - 20px, 1480px);
+        padding-top: 18px;
+      }
+
+      .summary-grid,
+      .controls,
+      .form-grid,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stage-grid {
+        grid-template-columns: 1fr;
+        min-width: 220px;
+      }
+
+      .stage-row {
+        grid-template-columns: 1fr;
+      }
+
+      th, td {
+        padding: 10px;
+      }
+
+      .toolbar,
+      .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .dashboard-item {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell view active" id="trackerView">
+    <header>
+      <div>
+        <h1>Finance Application Tracker</h1>
+      </div>
+      <div class="toolbar" aria-label="Application tools">
+        <button class="btn" id="addBtn" type="button" title="Add application">+ Add</button>
+        <button class="btn secondary" id="exportBtn" type="button" title="Export backup">Export</button>
+        <button class="btn secondary" id="importBtn" type="button" title="Import backup">Import</button>
+        <button class="btn warning" id="resetBtn" type="button" title="Reset sample data">Reset</button>
+        <input class="hidden-file" id="fileInput" type="file" accept="application/json">
+      </div>
+    </header>
+
+    <section class="controls" aria-label="Filters">
+      <div class="field">
+        <label for="searchInput">Search</label>
+        <input id="searchInput" type="search" placeholder="Company, role, stage, notes">
+      </div>
+      <div class="field">
+        <label for="sortSelect">Sort by</label>
+        <select id="sortSelect">
+          <option value="deadline">Next Deadline</option>
+          <option value="roleAZ">Role A–Z</option>
+          <option value="firmTypeAZ">Firm Type A–Z</option>
+          <option value="appliedNewest">Newest applications</option>
+          <option value="appliedOldest">Oldest applications</option>
+          <option value="updated">Recently updated</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="statusFilter">Status</label>
+        <select id="statusFilter">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="due">Due in &lt;7 days</option>
+          <option value="offers">Offers</option>
+          <option value="rejections">Rejections</option>
+        </select>
+      </div>
+      <div class="metric-group">
+        <div class="metric"><span>Total</span><strong id="totalMetric">0</strong></div>
+        <div class="metric"><span>In Progress</span><strong id="progressMetric">0</strong></div>
+      </div>
+    </section>
+
+    <div class="table-wrap" id="tableWrap">
+      <table>
+        <colgroup>
+          <col class="col-company">
+          <col class="col-stages">
+          <col class="col-deadline">
+          <col class="col-notes">
+          <col class="col-actions">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Stages</th>
+            <th>Next Deadline</th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="applicationRows"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="emptyState">No applications match the current filters.</div>
+  </main>
+
+  <section class="shell view" id="outcomesView">
+    <header>
+      <div>
+        <h1>Outcome Notes</h1>
+        <p class="subtitle">Notes for applications marked as offer or rejected.</p>
+      </div>
+    </header>
+
+    <div class="dashboard-list" id="outcomeList"></div>
+    <div class="empty" id="outcomeEmpty">No rejected applications or offers yet.</div>
+  </section>
+
+  <section class="shell view" id="detailView">
+    <div class="detail-head">
+      <div class="detail-title">
+        <h1 id="detailCompany">Application</h1>
+        <p class="subtitle" id="detailRole"></p>
+      </div>
+      <div class="detail-head-actions">
+        <button class="btn" id="saveDetailTopBtn" type="button">Save Changes</button>
+        <button class="btn secondary" id="backToTrackerBtn" type="button">Back</button>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="panel">
+        <h2>Documents Used</h2>
+        <div class="document-row">
+          <input class="file-input-hidden" id="cvFileInput" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+          <div id="cvDocument"></div>
+        </div>
+        <div class="document-row">
+          <input class="file-input-hidden" id="coverFileInput" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+          <div id="coverDocument"></div>
+        </div>
+        <div class="document-row additional-document-heading">
+          <input class="file-input-hidden" id="additionalDocumentInput" type="file" accept=".pdf,.doc,.docx,.txt,.rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/rtf">
+          <div class="additional-documents-list" id="additionalDocuments"></div>
+          <button class="btn secondary doc-action-btn" id="addAdditionalDocumentBtn" type="button">+ Add another document</button>
+        </div>
+      </div>
+
+      <div class="panel compact">
+        <h2>Application Snapshot</h2>
+        <div class="snapshot-strip" id="detailSnapshot"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Prep Checklist</h2>
+          <button class="btn secondary" id="editChecklistBtn" type="button">Edit</button>
+        </div>
+        <div class="checklist" id="prepChecklist"></div>
+      </div>
+
+      <div class="panel full">
+        <h2>Role Notes</h2>
+        <textarea id="roleNotesInput" placeholder="What the role involves, team details, application requirements, useful links"></textarea>
+      </div>
+
+      <div class="panel full">
+        <h2>Interview Notes</h2>
+        <textarea id="interviewNotesInput" placeholder="Technical topics, likely questions, examples to prepare, people spoken to"></textarea>
+      </div>
+
+      <div class="panel full">
+        <button class="btn" id="saveDetailBtn" type="button">Save Changes</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="dialog">
+      <div class="dialog-head">
+        <h2 id="modalTitle">Add Application</h2>
+        <div class="dialog-status-group" role="radiogroup" aria-label="Application status">
+          <label class="dialog-status-choice"><input type="radio" name="applicationStatus" value="In progress" checked><span>In progress</span></label>
+          <label class="dialog-status-choice"><input type="radio" name="applicationStatus" value="Offer"><span>Offer</span></label>
+          <label class="dialog-status-choice"><input type="radio" name="applicationStatus" value="Rejected"><span>Rejected</span></label>
+        </div>
+        <button class="icon-btn" id="closeBtn" type="button" title="Close">x</button>
+      </div>
+      <form id="applicationForm">
+        <input type="hidden" id="appId">
+        <div class="form-grid">
+          <div class="field">
+            <label for="companyInput">Company</label>
+            <input id="companyInput" required autocomplete="organization">
+          </div>
+          <div class="field">
+            <label for="roleInput">Role</label>
+            <input id="roleInput" required>
+          </div>
+          <div class="field">
+            <label for="deadlineInput">Next Deadline</label>
+            <input id="deadlineInput" type="date">
+            <label class="deadline-unknown-option" for="deadlineUnknown">
+              <input id="deadlineUnknown" type="checkbox">
+              <span>Deadline Unknown</span>
+            </label>
+          </div>
+          <div class="field">
+            <label for="categoryInput">Company Category</label>
+            <input id="categoryInput" placeholder="Investment Bank, FinTech, Trading Firm">
+          </div>
+          <div class="field full">
+            <label for="urlInput">Job Description Link</label>
+            <input id="urlInput" type="url">
+          </div>
+          <div class="field full">
+            <label>Stages</label>
+            <div class="stage-editor" id="stageEditor"></div>
+            <div class="stage-actions">
+              <button class="btn secondary" id="addStageBtn" type="button">+ Stage</button>
+            </div>
+          </div>
+          <div class="field full">
+            <label for="notesInput">Notes</label>
+            <textarea id="notesInput" placeholder="Interview prep, Contacts, Salary"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn warning" id="deleteBtn" type="button">Delete</button>
+          <button class="btn" type="submit">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-btn active" id="trackerNavBtn" type="button">Tracker</button>
+    <button class="nav-btn" id="outcomesNavBtn" type="button">Outcomes</button>
+  </nav>
+
+  <script>
+    const storageKey = "finance-application-tracker-v2";
+    const defaultStages = [
+      "CV Screening",
+      "Online Assessments",
+      "HireVue"
+    ];
+    const stageStates = ["todo", "done"];
+    const stageLabels = { todo: "To do", done: "Done" };
+    const applicationStatuses = ["In progress", "Offer", "Rejected"];
+    const priorityRank = { High: 0, Medium: 1, Low: 2 };
+    const sampleData = [
+  {
+    "id": "9a4bb421-9cd6-48b0-bff9-f3d5790ba10c",
+    "company": "Goldman Stanley",
+    "role": "M&A Analyst",
+    "deadline": "2026-10-08",
+    "priority": "Medium",
+    "status": "Rejected",
+    "appliedAt": "2026-10-01",
+    "companyCategory": "Bulge Bracket",
+    "url": "",
+    "notes": "Rejections automatically go to the bottom",
+    "roleNotes": "",
+    "interviewNotes": "",
+    "outcomeNotes": "",
+    "prepChecklist": [
+      {
+        "text": "Researched firm",
+        "done": false
+      },
+      {
+        "text": "Prepared answers",
+        "done": false
+      }
+    ],
+    "documents": {},
+    "stages": [
+      {
+        "name": "CV Screening",
+        "status": "done"
+      },
+      {
+        "name": "Online Assessments",
+        "status": "done"
+      },
+      {
+        "name": "HireVue",
+        "status": "todo"
+      }
+    ],
+    "updatedAt": 1790846871377
+  },
+  {
+    "id": "d54d3f3a-cfc3-44c9-92c0-cbec9149772e",
+    "company": "Example Bank",
+    "role": "Equity Research Graduate",
+    "deadline": "2026-10-05",
+    "priority": "Medium",
+    "status": "Offer",
+    "appliedAt": "2026-09-28",
+    "companyCategory": "Investment Bank",
+    "url": "https://www.linkedin.com/in/jaydarvay/",
+    "notes": "Paste in the job description link, and it shows up as a hyperlink here.",
+    "roleNotes": "",
+    "interviewNotes": "",
+    "outcomeNotes": "",
+    "prepChecklist": [
+      {
+        "text": "Researched firm",
+        "done": false
+      },
+      {
+        "text": "Prepared answers",
+        "done": false
+      }
+    ],
+    "documents": {},
+    "stages": [
+      {
+        "name": "CV Screening",
+        "status": "done"
+      },
+      {
+        "name": "HireVue",
+        "status": "done"
+      },
+      {
+        "name": "Assessment Centre",
+        "status": "done"
+      },
+      {
+        "name": "In-Person Interview",
+        "status": "done"
+      }
+    ],
+    "updatedAt": 1790857084835
+  },
+  {
+    "id": "00b20af7-88c2-4e3d-b69c-06d00d944dda",
+    "company": "Example Capital Partners",
+    "role": "Private Equity Analyst",
+    "deadline": "2026-10-02",
+    "priority": "High",
+    "status": "In progress",
+    "appliedAt": "2026-09-29",
+    "companyCategory": "Private Equity Firm",
+    "url": "",
+    "notes": "Add things you need to remember for the role. Salary, recruiter email, etc...",
+    "roleNotes": "",
+    "interviewNotes": "",
+    "outcomeNotes": "",
+    "prepChecklist": [
+      {
+        "text": "Researched firm",
+        "done": false
+      },
+      {
+        "text": "Prepared answers",
+        "done": false
+      }
+    ],
+    "documents": {
+      "additional": []
+    },
+    "stages": [
+      {
+        "name": "CV Screening",
+        "status": "done"
+      },
+      {
+        "name": "HireVue",
+        "status": "todo"
+      },
+      {
+        "name": "Technical Interview",
+        "status": "todo"
+      },
+      {
+        "name": "Final Interview",
+        "status": "todo"
+      }
+    ],
+    "updatedAt": 1790888885469
+  },
+  {
+    "id": "581d1e24-e758-4031-bf79-25b7f014478c",
+    "company": "Example Asset Management",
+    "role": "Investment Analyst",
+    "deadline": "2026-10-11",
+    "priority": "Low",
+    "status": "In progress",
+    "appliedAt": "2026-09-22",
+    "companyCategory": "Asset Manager",
+    "url": "https://www.linkedin.com/in/jaydarvay/",
+    "notes": "Example: Revise financial modelling basics for the technical interview. Use the job description link above to refresh the company values.",
+    "roleNotes": "",
+    "interviewNotes": "",
+    "outcomeNotes": "",
+    "prepChecklist": [
+      {
+        "text": "Researched firm",
+        "done": false
+      },
+      {
+        "text": "Prepared answers",
+        "done": false
+      }
+    ],
+    "documents": {},
+    "stages": [
+      {
+        "name": "CV Screening",
+        "status": "done"
+      },
+      {
+        "name": "Online Assessments",
+        "status": "done"
+      },
+      {
+        "name": "HireVue",
+        "status": "done"
+      },
+      {
+        "name": "Technical Interview",
+        "status": "todo"
+      }
+    ],
+    "updatedAt": 1790888557924
+  }
+];
+
+    let applications = loadApplications();
+    let editingId = null;
+    let detailId = null;
+    let pendingAdditionalDocumentIndex = null;
+    let activeView = "tracker";
+
+    const rows = document.querySelector("#applicationRows");
+    const tableWrap = document.querySelector("#tableWrap");
+    const emptyState = document.querySelector("#emptyState");
+    const modal = document.querySelector("#modal");
+    const form = document.querySelector("#applicationForm");
+    const stageEditor = document.querySelector("#stageEditor");
+    const fileInput = document.querySelector("#fileInput");
+    const outcomeList = document.querySelector("#outcomeList");
+    const outcomeEmpty = document.querySelector("#outcomeEmpty");
+
+    document.querySelector("#addBtn").addEventListener("click", () => openEditor());
+    document.querySelector("#closeBtn").addEventListener("click", closeEditor);
+    document.querySelector("#exportBtn").addEventListener("click", exportData);
+    document.querySelector("#importBtn").addEventListener("click", () => fileInput.click());
+    document.querySelector("#resetBtn").addEventListener("click", resetData);
+    document.querySelector("#deleteBtn").addEventListener("click", deleteCurrent);
+    document.querySelector("#addStageBtn").addEventListener("click", addStageToEditor);
+    document.querySelector("#searchInput").addEventListener("input", render);
+    document.querySelector("#statusFilter").addEventListener("change", render);
+    document.querySelector("#sortSelect").addEventListener("change", render);
+    document.querySelector("#trackerNavBtn").addEventListener("click", () => showView("tracker"));
+    document.querySelector("#outcomesNavBtn").addEventListener("click", () => showView("outcomes"));
+    document.querySelector("#backToTrackerBtn").addEventListener("click", () => showView("tracker"));
+    document.querySelector("#saveDetailBtn").addEventListener("click", saveDetails);
+    document.querySelector("#saveDetailTopBtn").addEventListener("click", saveDetails);
+    ["#roleNotesInput", "#interviewNotesInput"].forEach(selector => {
+      const field = document.querySelector(selector);
+      field.addEventListener("input", () => {
+        autoResizeNotes(field);
+        autosaveDetails();
+      });
+    });
+    document.querySelector("#editChecklistBtn").addEventListener("click", toggleChecklistEdit);
+    document.querySelector("#deadlineUnknown").addEventListener("change", event => {
+      const dateInput = document.querySelector("#deadlineInput");
+      dateInput.disabled = event.target.checked;
+      if (event.target.checked) dateInput.value = "";
+    });
+    document.querySelector("#cvFileInput").addEventListener("change", event => saveDocument("cv", event));
+    document.querySelector("#coverFileInput").addEventListener("change", event => saveDocument("cover", event));
+    document.querySelector("#addAdditionalDocumentBtn").addEventListener("click", () => {
+      pendingAdditionalDocumentIndex = null;
+      document.querySelector("#additionalDocumentInput").click();
+    });
+    document.querySelector("#additionalDocumentInput").addEventListener("change", saveAdditionalDocument);
+    fileInput.addEventListener("change", importData);
+    modal.addEventListener("click", event => {
+      if (event.target === modal) closeEditor();
+    });
+    form.addEventListener("submit", saveFromForm);
+
+    render();
+
+    function getOffsetDate(days) {
+      const date = new Date();
+      date.setDate(date.getDate() + days);
+      return date.toISOString().slice(0, 10);
+    }
+
+    function makeDefaultStages() {
+      return defaultStages.map((name, index) => ({ name, status: index === 0 ? "todo" : "todo" }));
+    }
+
+    function makeDefaultChecklist() {
+      return [
+        { text: "Researched firm", done: false },
+        { text: "Prepared answers", done: false }
+      ];
+    }
+
+    function loadApplications() {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return sampleData;
+      try {
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed)) return sampleData;
+        return parsed.map(normalizeApplication);
+      } catch {
+        return sampleData;
+      }
+    }
+
+    function normalizeApplication(app) {
+      const deadline = app.deadline || "";
+      return {
+        id: app.id || crypto.randomUUID(),
+        company: app.company || "",
+        role: app.role || "",
+        deadline,
+        priority: getUrgency(deadline),
+        status: normalizeStatus(app.status),
+        appliedAt: app.appliedAt || "",
+        companyCategory: app.companyCategory || "",
+        url: app.url || "",
+        notes: ({
+          "Do technical prep for interview - revise financial modelling basics, Excel skills etc.": "Add things you need to remember for the role.",
+          "Prepare examples for teamwork, markets awareness, and why this division.": "This is where the job description link shows up as a hyperlink.",
+          "Tailor cover letter to portfolio construction and risk management.": "Example: Revise financial modelling basics for the technical interview, and use the job description link here for role requirements."
+        })[app.notes] || app.notes || "",
+        roleNotes: app.roleNotes === "yes yes" && app.company === "Example Capital Partners" && app.role === "Private Equity Analyst" ? "" : (app.roleNotes || ""),
+        interviewNotes: app.interviewNotes || "",
+        outcomeNotes: app.outcomeNotes || "",
+        prepChecklist: Array.isArray(app.prepChecklist) && app.prepChecklist.length ? app.prepChecklist.map(item => ({
+          text: item.text || "Checklist item",
+          done: Boolean(item.done)
+        })) : makeDefaultChecklist(),
+        documents: app.documents || {},
+        stages: Array.isArray(app.stages) && app.stages.length ? app.stages.map(stage => ({
+          name: stage.name === "Online Tests" ? "Online Assessments" : (stage.name || "Stage"),
+          status: stage.status === "done" ? "done" : "todo"
+        })) : makeDefaultStages(),
+        updatedAt: app.updatedAt || Date.now()
+      };
+    }
+
+    function persist() {
+      localStorage.setItem(storageKey, JSON.stringify(applications));
+    }
+
+    function render() {
+      applications = applications.map(normalizeApplication);
+      const filtered = getFilteredApplications();
+      rows.innerHTML = "";
+      filtered.forEach(app => rows.appendChild(createRow(app)));
+      tableWrap.style.display = filtered.length ? "block" : "none";
+      emptyState.classList.toggle("visible", !filtered.length);
+      updateMetrics();
+      renderOutcomes();
+      if (detailId) renderDetail();
+    }
+
+    function getFilteredApplications() {
+      const search = document.querySelector("#searchInput").value.trim().toLowerCase();
+      const status = document.querySelector("#statusFilter").value;
+      const sort = document.querySelector("#sortSelect").value;
+
+      return applications
+        .filter(app => {
+          const text = [
+            app.company,
+            app.role,
+            app.status,
+            app.companyCategory,
+            app.notes,
+            app.roleNotes,
+            app.interviewNotes,
+            ...app.stages.map(stage => stage.name)
+          ].join(" ").toLowerCase();
+          const dueSoon = app.deadline && daysUntil(app.deadline) < 7;
+          return (!search || text.includes(search))
+            && (status === "all"
+              || (status === "active" && (app.status === "In progress" || app.status === "Offer"))
+              || (status === "due" && app.status !== "Rejected" && dueSoon)
+              || (status === "offers" && app.status === "Offer")
+              || (status === "rejections" && app.status === "Rejected"));
+        })
+        .sort((a, b) => {
+          if (sort === "roleAZ") {
+            return a.role.localeCompare(b.role, undefined, { sensitivity: "base" })
+              || a.company.localeCompare(b.company, undefined, { sensitivity: "base" });
+          }
+          if (sort === "firmTypeAZ") {
+            const typeOrder = a.companyCategory.localeCompare(b.companyCategory, undefined, { sensitivity: "base" });
+            return typeOrder || a.company.localeCompare(b.company, undefined, { sensitivity: "base" });
+          }
+          if (a.status === "Rejected" && b.status !== "Rejected") return 1;
+          if (a.status !== "Rejected" && b.status === "Rejected") return -1;
+          if (sort === "appliedNewest") return appliedTime(b.appliedAt) - appliedTime(a.appliedAt);
+          if (sort === "appliedOldest") return appliedTime(a.appliedAt) - appliedTime(b.appliedAt);
+          if (sort === "updated") return b.updatedAt - a.updatedAt;
+          return deadlineTime(a.deadline) - deadlineTime(b.deadline);
+        });
+    }
+
+    function createRow(app) {
+      const tr = document.createElement("tr");
+      tr.className = app.status === "Rejected" ? "rejected-row" : "";
+      const notesHtml = buildNotesHtml(app);
+      tr.innerHTML = `
+        <td class="company">
+          <button class="company-link" type="button" data-action="detail">${escapeHtml(app.company)}</button>
+          <div class="role">${escapeHtml(app.role)}</div>
+          <div class="tagline">
+            <button class="pill status-pill ${statusClass(app.status)}" type="button" data-action="status">${escapeHtml(app.status)}</button>
+            ${app.companyCategory ? `<span class="pill category-pill">${escapeHtml(app.companyCategory)}</span>` : ""}
+          </div>
+        </td>
+        <td><div class="stage-grid"></div></td>
+        <td class="date"><span class="date-pill ${app.priority.toLowerCase()}">${formatDate(app.deadline)}</span></td>
+        <td class="notes"><div class="notes-content">${notesHtml}</div></td>
+        <td>
+          <div class="actions">
+            <button class="icon-btn" type="button" data-action="detail"><span>Documents Used</span><span>&amp; Prep Notes</span></button>
+            <button class="icon-btn" type="button" data-action="edit">Edit</button>
+            <button class="icon-btn delete-btn" type="button" data-action="delete">Delete</button>
+          </div>
+        </td>
+      `;
+
+      const stageGrid = tr.querySelector(".stage-grid");
+      app.stages.forEach((stage, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `stage ${stage.status}`;
+        button.title = "Change stage status";
+        button.innerHTML = `<span>${stageLabels[stage.status]}</span><strong>${escapeHtml(stage.name)}</strong>`;
+        button.addEventListener("click", () => cycleStage(app.id, index));
+        stageGrid.appendChild(button);
+      });
+
+      tr.querySelectorAll("[data-action='detail']").forEach(button => {
+        button.addEventListener("click", () => openDetail(app.id));
+      });
+      tr.querySelector("[data-action='status']").addEventListener("click", () => cycleApplicationStatus(app.id));
+      tr.querySelector("[data-action='edit']").addEventListener("click", () => openEditor(app.id));
+      tr.querySelector("[data-action='delete']").addEventListener("click", () => deleteApplication(app.id));
+      return tr;
+    }
+
+    function buildNotesHtml(app) {
+      const link = app.url ? `<a href="${escapeAttribute(app.url)}" target="_blank" rel="noopener">Job Description</a>` : "";
+      const notes = app.notes ? escapeHtml(app.notes) : "";
+      return `${link}${link && notes ? "<br>" : ""}${notes}`;
+    }
+
+    function cycleStage(appId, index) {
+      const app = applications.find(item => item.id === appId);
+      if (!app || !app.stages[index]) return;
+      app.stages[index].status = app.stages[index].status === "done" ? "todo" : "done";
+      app.updatedAt = Date.now();
+      persist();
+      render();
+      if (detailId === appId) renderDetail();
+    }
+
+    function cycleApplicationStatus(appId) {
+      const app = applications.find(item => item.id === appId);
+      if (!app) return;
+      const current = applicationStatuses.indexOf(normalizeStatus(app.status));
+      app.status = applicationStatuses[(current + 1) % applicationStatuses.length];
+      app.updatedAt = Date.now();
+      persist();
+      render();
+    }
+
+    function normalizeStatus(status) {
+      return applicationStatuses.includes(status) ? status : "In progress";
+    }
+
+    function statusClass(status) {
+      const normalized = normalizeStatus(status);
+      if (normalized === "Offer") return "status-offer";
+      if (normalized === "Rejected") return "status-rejected";
+      return "status-in-progress";
+    }
+
+    function getNextAction(app) {
+      const next = app.stages.find(stage => stage.status === "todo");
+      return next ? next.name : "Complete";
+    }
+
+    function isComplete(app) {
+      return app.stages.every(stage => stage.status !== "todo");
+    }
+
+    function isDueSoon(app) {
+      if (!app.deadline) return false;
+      const deadline = toDate(app.deadline);
+      const week = startOfToday();
+      week.setDate(week.getDate() + 7);
+      return deadline <= week;
+    }
+
+    function updateMetrics() {
+      document.querySelector("#totalMetric").textContent = applications.length;
+      document.querySelector("#progressMetric").textContent = applications.filter(app => app.status === "In progress").length;
+    }
+
+    function openEditor(id) {
+      editingId = id || null;
+      const app = editingId ? applications.find(item => item.id === editingId) : {
+        id: "",
+        company: "",
+        role: "",
+        deadline: "",
+        status: "In progress",
+        appliedAt: getOffsetDate(0),
+        companyCategory: "",
+        url: "",
+        notes: "",
+        stages: makeDefaultStages()
+      };
+      document.querySelector("#modalTitle").textContent = editingId ? "Edit Application" : "Add Application";
+      document.querySelector(`input[name="applicationStatus"][value="${normalizeStatus(app.status)}"]`).checked = true;
+      document.querySelector("#deleteBtn").style.visibility = editingId ? "visible" : "hidden";
+      document.querySelector("#appId").value = app.id;
+      document.querySelector("#companyInput").value = app.company;
+      document.querySelector("#roleInput").value = app.role;
+      document.querySelector("#deadlineInput").value = app.deadline;
+      const deadlineUnknown = document.querySelector("#deadlineUnknown");
+      deadlineUnknown.checked = Boolean(editingId && !app.deadline);
+      document.querySelector("#deadlineInput").disabled = deadlineUnknown.checked;
+      document.querySelector("#categoryInput").value = app.companyCategory;
+      document.querySelector("#urlInput").value = app.url;
+      document.querySelector("#notesInput").value = app.notes;
+      renderStageEditor(app.stages);
+      modal.classList.add("open");
+      document.querySelector("#companyInput").focus();
+    }
+
+    function closeEditor() {
+      modal.classList.remove("open");
+      form.reset();
+      editingId = null;
+    }
+
+    function renderStageEditor(stages) {
+      stageEditor.innerHTML = "";
+      stages.forEach((stage, index) => {
+        const row = document.createElement("div");
+        row.className = "stage-row";
+        row.innerHTML = `
+          <input data-stage-name="${index}" value="${escapeAttribute(stage.name)}" aria-label="Stage name">
+          <select data-stage-status="${index}" aria-label="Stage status">
+            <option value="todo">To do</option>
+            <option value="done">Done</option>
+          </select>
+          <button class="icon-btn remove-stage" type="button" title="Remove stage" data-remove-stage>X</button>
+        `;
+        row.querySelector("select").value = stage.status;
+        row.querySelector("[data-remove-stage]").addEventListener("click", () => {
+          row.remove();
+        });
+        stageEditor.appendChild(row);
+      });
+    }
+
+    function addStageToEditor() {
+      const stages = [...stageEditor.querySelectorAll(".stage-row")].map(row => ({
+        name: row.querySelector("[data-stage-name]").value.trim(),
+        status: row.querySelector("[data-stage-status]").value
+      }));
+      stages.push({ name: "New Stage", status: "todo" });
+      renderStageEditor(stages);
+      const inputs = stageEditor.querySelectorAll("[data-stage-name]");
+      const lastInput = inputs[inputs.length - 1];
+      lastInput.focus();
+      lastInput.select();
+    }
+
+    function saveFromForm(event) {
+      event.preventDefault();
+      const stages = [...stageEditor.querySelectorAll(".stage-row")]
+        .map(row => ({
+          name: row.querySelector("[data-stage-name]").value.trim(),
+          status: row.querySelector("[data-stage-status]").value
+        }))
+        .filter(stage => stage.name);
+
+      const app = normalizeApplication({
+        id: editingId || crypto.randomUUID(),
+        company: document.querySelector("#companyInput").value.trim(),
+        role: document.querySelector("#roleInput").value.trim(),
+        deadline: document.querySelector("#deadlineUnknown").checked ? "" : document.querySelector("#deadlineInput").value,
+        status: document.querySelector("input[name='applicationStatus']:checked").value,
+        appliedAt: editingId ? applications.find(item => item.id === editingId)?.appliedAt : getOffsetDate(0),
+        companyCategory: document.querySelector("#categoryInput").value.trim(),
+        url: document.querySelector("#urlInput").value.trim(),
+        notes: document.querySelector("#notesInput").value.trim(),
+        roleNotes: editingId ? applications.find(item => item.id === editingId)?.roleNotes : "",
+        interviewNotes: editingId ? applications.find(item => item.id === editingId)?.interviewNotes : "",
+        outcomeNotes: editingId ? applications.find(item => item.id === editingId)?.outcomeNotes : "",
+        prepChecklist: editingId ? applications.find(item => item.id === editingId)?.prepChecklist : makeDefaultChecklist(),
+        documents: editingId ? applications.find(item => item.id === editingId)?.documents : {},
+        stages,
+        updatedAt: Date.now()
+      });
+
+      if (editingId) {
+        applications = applications.map(item => item.id === editingId ? app : item);
+      } else {
+        applications.unshift(app);
+      }
+
+      persist();
+      closeEditor();
+      render();
+    }
+
+    function deleteCurrent() {
+      if (editingId) deleteApplication(editingId);
+    }
+
+    function deleteApplication(appId) {
+      const app = applications.find(item => item.id === appId);
+      if (!app) return;
+      if (!confirm(`Delete ${app.company} from the tracker?`)) return;
+      applications = applications.filter(item => item.id !== appId);
+      persist();
+      if (editingId === appId) closeEditor();
+      if (detailId === appId) {
+        detailId = null;
+        showView("tracker");
+      } else {
+        render();
+      }
+    }
+
+    function resetData() {
+      if (!confirm("Are you sure you want to reset the tracker (you will remove all of your applications)?")) return;
+      if (!confirm("You are 100% sure?")) return;
+      applications = sampleData.map(normalizeApplication);
+      persist();
+      render();
+    }
+
+    function showView(view) {
+      activeView = view;
+      document.querySelectorAll(".view").forEach(element => element.classList.remove("active"));
+      document.querySelector("#trackerNavBtn").classList.toggle("active", view === "tracker");
+      document.querySelector("#outcomesNavBtn").classList.toggle("active", view === "outcomes");
+      if (view === "tracker") {
+        document.querySelector("#trackerView").classList.add("active");
+      }
+      if (view === "outcomes") {
+        document.querySelector("#outcomesView").classList.add("active");
+        renderOutcomes();
+      }
+      if (view === "detail") {
+        document.querySelector("#detailView").classList.add("active");
+        renderDetail();
+      }
+    }
+
+    function openDetail(id) {
+      detailId = id;
+      showView("detail");
+    }
+
+    function renderDetail() {
+      const app = applications.find(item => item.id === detailId);
+      if (!app) {
+        showView("tracker");
+        return;
+      }
+      document.querySelector("#detailCompany").textContent = app.company;
+      document.querySelector("#detailRole").textContent = app.role;
+      const roleNotesField = document.querySelector("#roleNotesInput");
+      const interviewNotesField = document.querySelector("#interviewNotesInput");
+      roleNotesField.value = app.roleNotes || "";
+      interviewNotesField.value = app.interviewNotes || "";
+      autoResizeNotes(roleNotesField);
+      autoResizeNotes(interviewNotesField);
+      const jobLink = app.url ? `<a class="snapshot-link" href="${escapeAttribute(app.url)}" target="_blank" rel="noopener">Job Description</a>` : "";
+      document.querySelector("#detailSnapshot").innerHTML = `
+        <span class="date-pill ${app.priority.toLowerCase()}">${formatDate(app.deadline)}</span>
+        <button class="pill status-pill ${statusClass(app.status)}" type="button" id="detailStatusBtn">${escapeHtml(app.status)}</button>
+        <span class="snapshot-next">${escapeHtml(getNextAction(app))}</span>
+        ${jobLink}
+        <div class="snapshot-notes">
+          <textarea id="snapshotNotesInput" placeholder="Interview prep, Contacts, Salary">${escapeHtml(app.notes || "")}</textarea>
+        </div>
+      `;
+      document.querySelector("#snapshotNotesInput").addEventListener("input", autosaveDetails);
+      document.querySelector("#detailStatusBtn").addEventListener("click", () => cycleApplicationStatus(app.id));
+      renderChecklist(false);
+      renderDocument("cv", "#cvDocument");
+      renderDocument("cover", "#coverDocument");
+      renderAdditionalDocuments();
+    }
+
+    function renderChecklist(editing) {
+      const app = applications.find(item => item.id === detailId);
+      const holder = document.querySelector("#prepChecklist");
+      const editButton = document.querySelector("#editChecklistBtn");
+      if (!app || !holder) return;
+      editButton.textContent = editing ? "Done" : "Edit";
+      holder.innerHTML = "";
+
+      app.prepChecklist.forEach((item, index) => {
+        const row = document.createElement("div");
+        if (editing) {
+          row.className = "check-edit-row";
+          row.innerHTML = `
+            <span></span>
+            <input value="${escapeAttribute(item.text)}" aria-label="Checklist item">
+            <button class="icon-btn remove-stage" type="button" title="Remove checklist item">X</button>
+          `;
+          row.querySelector("input").addEventListener("input", event => {
+            app.prepChecklist[index].text = event.target.value;
+            app.updatedAt = Date.now();
+            persist();
+          });
+          row.querySelector("button").addEventListener("click", () => {
+            app.prepChecklist.splice(index, 1);
+            app.updatedAt = Date.now();
+            persist();
+            renderChecklist(true);
+          });
+        } else {
+          row.className = `check-item ${item.done ? "done" : ""}`;
+          row.innerHTML = `
+            <input type="checkbox" ${item.done ? "checked" : ""} aria-label="${escapeAttribute(item.text)}">
+            <span>${escapeHtml(item.text)}</span>
+            <span></span>
+          `;
+          row.querySelector("input").addEventListener("change", event => {
+            app.prepChecklist[index].done = event.target.checked;
+            app.updatedAt = Date.now();
+            persist();
+            renderChecklist(false);
+            render();
+          });
+        }
+        holder.appendChild(row);
+      });
+
+      if (editing) {
+        const addButton = document.createElement("button");
+        addButton.className = "btn secondary";
+        addButton.type = "button";
+        addButton.textContent = "+ Checklist Item";
+        addButton.addEventListener("click", () => {
+          app.prepChecklist.push({ text: "New checklist item", done: false });
+          app.updatedAt = Date.now();
+          persist();
+          renderChecklist(true);
+        });
+        holder.appendChild(addButton);
+      }
+    }
+
+    function toggleChecklistEdit() {
+      const editing = document.querySelector("#editChecklistBtn").textContent === "Edit";
+      renderChecklist(editing);
+    }
+
+    function autoResizeNotes(field) {
+      field.style.height = "auto";
+      field.style.height = `${Math.max(field.scrollHeight, 120)}px`;
+    }
+
+    function autosaveDetails() {
+      const app = applications.find(item => item.id === detailId);
+      if (!app) return;
+      const snapshotNotesField = document.querySelector("#snapshotNotesInput");
+      if (!snapshotNotesField) return;
+      app.notes = snapshotNotesField.value;
+      app.roleNotes = document.querySelector("#roleNotesInput").value;
+      app.interviewNotes = document.querySelector("#interviewNotesInput").value;
+      app.updatedAt = Date.now();
+      persist();
+    }
+
+    function saveDetails() {
+      const app = applications.find(item => item.id === detailId);
+      if (!app) return;
+      autosaveDetails();
+      app.prepChecklist = app.prepChecklist.filter(item => item.text.trim());
+      app.updatedAt = Date.now();
+      persist();
+      render();
+      showView("tracker");
+    }
+
+    function saveDocument(type, event) {
+      const app = applications.find(item => item.id === detailId);
+      const file = event.target.files[0];
+      if (!app || !file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        app.documents = app.documents || {};
+        app.documents[type] = {
+          name: file.name,
+          type: file.type || "application/octet-stream",
+          dataUrl: reader.result,
+          uploadedAt: new Date().toISOString()
+        };
+        app.updatedAt = Date.now();
+        persist();
+        renderDetail();
+        event.target.value = "";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderDocument(type, selector) {
+      const app = applications.find(item => item.id === detailId);
+      const holder = document.querySelector(selector);
+      const documentData = app?.documents?.[type];
+      const label = type === "cv" ? "CV" : "Cover Letter";
+      const inputId = type === "cv" ? "cvFileInput" : "coverFileInput";
+      if (!documentData) {
+        holder.innerHTML = `<button class="btn secondary" type="button" data-add-document="${type}">Add ${label}</button>`;
+        holder.querySelector("[data-add-document]").addEventListener("click", () => {
+          document.querySelector(`#${inputId}`).click();
+        });
+        return;
+      }
+      holder.innerHTML = `
+        <div class="document-card">
+          <a class="document-link" href="#" data-open-saved-document>${label}</a>
+          <button class="btn secondary doc-action-btn" type="button" data-replace-document="${type}">Replace</button>
+          <button class="btn secondary doc-action-btn" type="button" data-remove-document="${type}">Remove</button>
+        </div>
+      `;
+      holder.querySelector("[data-open-saved-document]").addEventListener("click", event => openSavedDocument(event, documentData));
+      holder.querySelector("[data-replace-document]").addEventListener("click", () => {
+        document.querySelector(`#${inputId}`).click();
+      });
+      holder.querySelector("[data-remove-document]").addEventListener("click", () => {
+        delete app.documents[type];
+        app.updatedAt = Date.now();
+        persist();
+        renderDetail();
+      });
+    }
+
+    function openSavedDocument(event, documentData) {
+      event.preventDefault();
+      if (!documentData?.dataUrl) return;
+      const [metadata, encoded] = documentData.dataUrl.split(",", 2);
+      const mime = documentData.type || metadata.match(/^data:([^;]+)/)?.[1] || "application/octet-stream";
+      const binary = atob(encoded || "");
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+      const objectUrl = URL.createObjectURL(new Blob([bytes], { type: mime }));
+      const opened = window.open(objectUrl, "_blank");
+      if (!opened) {
+        const downloadLink = document.createElement("a");
+        downloadLink.href = objectUrl;
+        downloadLink.download = documentData.name || "document";
+        downloadLink.click();
+      }
+    }
+
+    function saveAdditionalDocument(event) {
+      const app = applications.find(item => item.id === detailId);
+      const file = event.target.files[0];
+      if (!app || !file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        app.documents = app.documents || {};
+        app.documents.additional = Array.isArray(app.documents.additional) ? app.documents.additional : [];
+        const record = {
+          name: file.name,
+          type: file.type || "application/octet-stream",
+          dataUrl: reader.result,
+          uploadedAt: new Date().toISOString()
+        };
+        if (pendingAdditionalDocumentIndex === null) {
+          app.documents.additional.push(record);
+        } else {
+          app.documents.additional[pendingAdditionalDocumentIndex] = record;
+        }
+        pendingAdditionalDocumentIndex = null;
+        app.updatedAt = Date.now();
+        persist();
+        renderDetail();
+        event.target.value = "";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderAdditionalDocuments() {
+      const app = applications.find(item => item.id === detailId);
+      const holder = document.querySelector("#additionalDocuments");
+      if (!app || !holder) return;
+      const extraDocuments = Array.isArray(app.documents?.additional) ? app.documents.additional : [];
+      holder.innerHTML = extraDocuments.map((documentData, index) => `
+        <div class="document-card">
+          <a class="document-link" href="#" data-open-saved-document>Document ${index + 3}</a>
+          <button class="btn secondary doc-action-btn" type="button" data-replace-additional="${index}">Replace</button>
+          <button class="btn secondary doc-action-btn" type="button" data-remove-additional="${index}">Remove</button>
+        </div>
+      `).join("");
+      holder.querySelectorAll("[data-open-saved-document]").forEach((link, index) => {
+        link.addEventListener("click", event => openSavedDocument(event, extraDocuments[index]));
+      });
+      holder.querySelectorAll("[data-replace-additional]").forEach(button => {
+        button.addEventListener("click", () => {
+          pendingAdditionalDocumentIndex = Number(button.dataset.replaceAdditional);
+          document.querySelector("#additionalDocumentInput").click();
+        });
+      });
+      holder.querySelectorAll("[data-remove-additional]").forEach(button => {
+        button.addEventListener("click", () => {
+          app.documents.additional.splice(Number(button.dataset.removeAdditional), 1);
+          app.updatedAt = Date.now();
+          persist();
+          renderDetail();
+        });
+      });
+    }
+
+    function renderOutcomes() {
+      if (!outcomeList) return;
+      const outcomeApps = applications.filter(app => app.status === "Rejected" || app.status === "Offer");
+      outcomeList.innerHTML = "";
+      outcomeApps.forEach(app => outcomeList.appendChild(createOutcomeItem(app)));
+      outcomeEmpty.classList.toggle("visible", !outcomeApps.length);
+    }
+
+    function createOutcomeItem(app) {
+      const item = document.createElement("div");
+      item.className = `dashboard-item ${app.status === "Rejected" ? "rejected" : ""}`;
+      item.innerHTML = `
+        <div>
+          <strong>${escapeHtml(app.company)}</strong>
+          <span class="dashboard-role">${escapeHtml(app.role)}</span>
+          ${app.companyCategory ? `<div class="dashboard-company-meta"><span class="pill category-pill">${escapeHtml(app.companyCategory)}</span></div>` : ""}
+        </div>
+        <div class="field">
+          <label>${app.status === "Offer" ? "Offer Notes" : "Rejection Notes"}</label>
+          <textarea data-outcome-notes>${escapeHtml(app.outcomeNotes || "")}</textarea>
+        </div>
+        <span class="flag-pill ${app.status === "Offer" ? "success" : "alert"}">${escapeHtml(app.status)}</span>
+        <button class="btn secondary" type="button">Open</button>
+      `;
+      item.querySelector("[data-outcome-notes]").addEventListener("input", event => {
+        app.outcomeNotes = event.target.value;
+        app.updatedAt = Date.now();
+        persist();
+      });
+      item.querySelector("button").addEventListener("click", () => openDetail(app.id));
+      return item;
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(applications, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `finance-applications-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed)) throw new Error("Expected a list");
+          applications = parsed.map(normalizeApplication);
+          persist();
+          render();
+        } catch {
+          alert("The selected file could not be imported.");
+        } finally {
+          fileInput.value = "";
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function startOfToday() {
+      const date = new Date();
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+
+    function toDate(value) {
+      const date = new Date(`${value}T00:00:00`);
+      return Number.isNaN(date.getTime()) ? new Date(8640000000000000) : date;
+    }
+
+    function daysUntil(value) {
+      if (!value) return 9999;
+      const dayMs = 24 * 60 * 60 * 1000;
+      return Math.ceil((toDate(value) - startOfToday()) / dayMs);
+    }
+
+    function getUrgency(deadline) {
+      if (!deadline) return "None";
+      const days = daysUntil(deadline);
+      if (days <= 3) return "High";
+      if (days <= 7) return "Medium";
+      return "Low";
+    }
+
+    function deadlineTime(value) {
+      return value ? toDate(value).getTime() : 8640000000000000;
+    }
+
+    function appliedTime(value) {
+      return value ? toDate(value).getTime() : 0;
+    }
+
+    function formatDate(value) {
+      if (!value) return "No date";
+      return toDate(value).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[character]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
+    }
+  </script>
+</body>
+</html>
