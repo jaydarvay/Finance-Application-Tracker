@@ -2,7 +2,7 @@
 
 A simple browser-based tool for tracking job applications, deadlines, interview preparation, and the documents used (CV, Cover Letter) for each application.
 
-**[Open the application tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)**
+**[Open the application tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)** (only for use on a laptop / computer)
 
 Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 
