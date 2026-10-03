@@ -10,7 +10,7 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 
 - **Four trackers:** Finance, Tech, Engineering, and Law.
 - **Track applications:** Input company details, roles, deadlines, notes, documents (CV, CL) and application stages.
-- **Stay organised:** Search and filter applications, sort by deadline or other details, and collapse company categories using the +/-.
+- **Stay organised:** Search and filter applications, sort by deadline or other details, and collapse and expand company categories using the +/- controls.
 - **Prepare for interviews:** Keep job description links, notes, checklists, and the CV and cover letter used for each application together.
 - **Useful Resources:** Find links to career support and content from professionals in the careers space.
 - **Manage your data:** Add, edit, delete, import, export, or reset applications.
