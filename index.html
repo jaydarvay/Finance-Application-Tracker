@@ -204,7 +204,7 @@
 
     .resource-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 16px;
       margin-top: 24px;
     }
@@ -433,6 +433,74 @@
       display: grid;
       gap: 6px;
       align-content: start;
+    }
+
+    .field > label {
+      color: var(--accent);
+    }
+
+    .field > .deadline-unknown-option {
+      color: var(--muted);
+    }
+
+    .application-document-picker .btn.secondary.document-upload-btn,
+    #detailView .btn.secondary.document-upload-btn {
+      min-height: 42px;
+      padding: 0 15px;
+      border: 1px solid #c9dceb;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f5faff, #eaf4fc);
+      color: #286da7;
+      font-size: 14px;
+      font-weight: 750;
+      box-shadow: 0 2px 5px rgba(23, 105, 170, .07);
+      transition: background .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+
+    .document-upload-btn::before {
+      content: "↑";
+      display: inline-grid;
+      place-items: center;
+      width: 19px;
+      height: 19px;
+      border: 1.5px solid currentColor;
+      border-radius: 50%;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .application-document-picker .btn.secondary.document-upload-btn:hover,
+    #detailView .btn.secondary.document-upload-btn:hover {
+      border-color: #a9c9e2;
+      background: linear-gradient(135deg, #edf6fd, #e1effa);
+      box-shadow: 0 3px 8px rgba(23, 105, 170, .12);
+      transform: translateY(-1px);
+    }
+
+    #detailView #addAdditionalDocumentBtn {
+      border-color: #a9c9e2;
+      background: #fff;
+      color: #286da7;
+    }
+
+    #detailView #addAdditionalDocumentBtn:hover {
+      border-color: #8fb8d8;
+      background: #f8fbff;
+      color: #286da7;
+    }
+
+    .application-document-picker .btn.secondary.document-upload-btn:focus-visible,
+    #detailView .btn.secondary.document-upload-btn:focus-visible {
+      outline: 3px solid rgba(23, 105, 170, .28);
+      outline-offset: 2px;
+    }
+
+    #companyInput::-webkit-contacts-auto-fill-button {
+      display: none !important;
+      visibility: hidden;
+      pointer-events: none;
+      position: absolute;
+      right: 0;
     }
 
     .deadline-unknown-option {
@@ -1073,11 +1141,15 @@
       grid-column: 1 / -1;
     }
 
+    .form-grid > .field:nth-child(n + 3) {
+      transform: translateY(1px);
+    }
+
     .stage-editor {
       display: grid;
       grid-template-columns: 1fr;
       gap: 8px;
-      margin-top: 6px;
+      margin-top: 5px;
       padding: 10px;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -1086,14 +1158,86 @@
 
     .stage-row {
       display: grid;
-      grid-template-columns: minmax(180px, 1fr) 124px 58px;
+      grid-template-columns: minmax(180px, 1fr) 168px 58px;
       align-items: center;
       gap: 8px;
     }
 
-    .stage-actions {
-      margin-top: 10px;
+    .stage-status-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f3f6f9;
     }
+
+    .stage-status-toggle button {
+      min-height: 34px;
+      padding: 0 8px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .stage-status-toggle button[aria-pressed="true"][data-status="todo"] {
+      border-color: #d6e0ec;
+      background: #fff;
+      color: #536174;
+      box-shadow: 0 1px 3px rgba(22, 36, 58, .08);
+    }
+
+    .stage-status-toggle button[aria-pressed="true"][data-status="done"] {
+      border-color: var(--green-line);
+      background: var(--green-soft);
+      color: var(--green);
+      box-shadow: 0 1px 3px rgba(22, 36, 58, .06);
+    }
+
+    .stage-status-toggle button:focus-visible {
+      outline: 2px solid rgba(23, 105, 170, .4);
+      outline-offset: 1px;
+    }
+
+    .stage-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 1.5px;
+    }
+
+    .stage-defaults-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, .48);
+    }
+
+    .stage-defaults-modal.open { display: flex; }
+    .stage-defaults-panel {
+      width: min(520px, 100%);
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, .22);
+    }
+    .stage-defaults-panel h2 { margin: 0 0 8px; font-size: 21px; }
+    .stage-defaults-panel p { margin: 0 0 14px; color: var(--muted); line-height: 1.45; }
+    .stage-default-list { display: grid; gap: 8px; max-height: 42vh; overflow: auto; padding: 0; margin: 0; list-style: none; }
+    .stage-default-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) 38px; gap: 8px; align-items: center; }
+    .stage-default-bullet { color: var(--accent); font-size: 20px; font-weight: 900; text-align: center; }
+    .stage-default-row input { width: 100%; min-width: 0; }
+    .stage-default-row .remove-stage { min-width: 38px; width: 38px; height: 38px; }
+    .stage-defaults-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+    .stage-defaults-add { margin-top: 12px; }
 
     .remove-stage {
       width: auto;
@@ -1400,6 +1544,8 @@
       .table-wrap {
         overflow-x: auto;
       }
+
+      .resource-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     @media (max-width: 680px) {
@@ -1495,15 +1641,13 @@
         gap: 6px;
       }
 
-      .resource-grid { grid-template-columns: 1fr; }
-
       .tracker-option {
         min-height: 34px;
         padding: 0 10px;
         font-size: 13px;
       }
 
-      .resource-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .resource-grid { grid-template-columns: 1fr; }
 
       .tracker-linkedin-link {
         width: 36px;
@@ -1521,6 +1665,350 @@
       }
 
     }
+
+
+    /* Trial modal refinements. */
+    .dialog {
+      max-height: min(866px, calc(100vh - 50px));
+    }
+
+    .dialog-head {
+      gap: 10px;
+      padding: 11.5px 16px;
+    }
+
+    .dialog-head h2 { font-size: 20px; }
+    .dialog-head .btn { min-height: 36px; padding: 0 11px; }
+    .dialog-status-group { gap: 5px; margin-left: 14px; }
+    .dialog-status-choice span { padding: 7px 10px; font-size: 12px; }
+    #closeBtn { width: 36px; height: 36px; }
+    form { padding: 14px 16px; }
+    .form-grid { gap: 10px; }
+
+    .dialog-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      flex: 0 0 auto;
+    }
+
+    #dialogSaveBtn { margin-left: 0; }
+    .form-actions { justify-content: space-between; }
+
+    .btn.warning.delete-footer-btn {
+      min-height: 40px;
+      border: 1px solid #edc5c5;
+      background: #fff5f5;
+      color: #a33d3d;
+      box-shadow: none;
+    }
+
+    .btn.warning.delete-footer-btn:hover {
+      border-color: #dfa3a3;
+      background: #ffebeb;
+      color: #922d2d;
+    }
+
+    .delete-icon-btn {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-color: #edc5c5;
+      background: #fff5f5;
+      color: #a33d3d;
+    }
+
+    .delete-icon-btn:hover {
+      border-color: #dfa3a3;
+      background: #ffebeb;
+      color: #922d2d;
+    }
+
+    .delete-icon-btn svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .delete-icon-btn:focus-visible {
+      outline: 3px solid rgba(163, 61, 61, .25);
+      outline-offset: 2px;
+    }
+
+    /* Trial visual refresh: retain the brand and interactions, refine the presentation. */
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-2: #f7f9fc;
+      --ink: #16243a;
+      --muted: #68778d;
+      --line: #dfe6ef;
+      --accent: #1769aa;
+      --accent-2: #3d79af;
+      --shadow: 0 8px 24px rgba(22, 36, 58, 0.055);
+    }
+
+    body {
+      background: var(--bg);
+      letter-spacing: -0.01em;
+    }
+
+    .shell {
+      width: min(1600px, calc(100% - 48px));
+      padding-top: 30px;
+    }
+
+    #trackerView > header {
+      margin-bottom: 24px;
+      align-items: center;
+    }
+
+    #trackerView > header h1 {
+      font-size: clamp(32px, 3vw, 42px);
+      letter-spacing: -0.035em;
+    }
+
+    .toolbar { gap: 8px; }
+
+    .btn,
+    .icon-btn,
+    .job-type-tab,
+    .tracker-option,
+    .stage {
+      transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+
+    .btn {
+      min-height: 42px;
+      border-radius: 10px;
+      box-shadow: 0 3px 9px rgba(22, 36, 58, .09);
+    }
+
+    .btn:hover,
+    .icon-btn:hover,
+    .job-type-tab:hover,
+    .tracker-option:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn.secondary,
+    .icon-btn {
+      border-color: #d6e0ec;
+    }
+
+    .btn.secondary:hover,
+    .icon-btn:hover {
+      border-color: #a9bfd8;
+      background: #f5f9fd;
+      box-shadow: 0 3px 10px rgba(22, 36, 58, .07);
+    }
+
+    .btn.warning {
+      background: #fff8f2;
+      border-color: #f0d5c2;
+    }
+
+    .btn.warning:hover {
+      background: #fff0e5;
+      border-color: #e7bd9f;
+    }
+
+    .job-type-tabs {
+      gap: 9px;
+      margin-bottom: 22px;
+    }
+
+    .job-type-tab {
+      min-height: 36px;
+      padding: 7px 15px;
+      border-color: #d9e9ed;
+      background: #eaf3f5;
+      color: #246572;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .job-type-tab:hover {
+      border-color: #bdd8de;
+      background: #dfedf0;
+      filter: none;
+    }
+
+    .job-type-tab.active,
+    .job-type-tab.active:hover {
+      border-color: #1769aa;
+      background: #1769aa;
+      color: #fff;
+      box-shadow: 0 3px 9px rgba(23, 105, 170, .18);
+    }
+
+    .controls {
+      gap: 16px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      border-color: #e2e8f0;
+      border-radius: 13px;
+      box-shadow: 0 4px 14px rgba(22, 36, 58, .035);
+    }
+
+    .controls .metric {
+      border-color: #e2e8f0;
+      border-radius: 10px;
+      background: #f9fbfd;
+    }
+
+    input, select, textarea {
+      border-color: #d8e1ec;
+      border-radius: 9px;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #4d8fc5;
+      box-shadow: 0 0 0 3px rgba(23, 105, 170, .12);
+    }
+
+    .table-wrap {
+      border-color: #dfe6ef;
+      border-radius: 13px;
+      box-shadow: 0 6px 20px rgba(22, 36, 58, .045);
+    }
+
+    th, td {
+      padding: 11px 13px;
+      border-bottom-color: #e8edf3;
+    }
+
+    th + th,
+    td + td {
+      border-left-color: #edf1f6;
+    }
+
+    th {
+      background: #f5f8fb;
+      color: #53637a;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .045em;
+    }
+
+    tbody tr:not(.category-group-row):hover td {
+      background: #fbfdff;
+    }
+
+    .category-group-row th {
+      border-top: 1px solid #e2e9f1;
+      border-bottom: 1px solid #e2e9f1;
+      background: #ebf3f9;
+      color: var(--ink);
+    }
+
+    .category-group-toggle,
+    .category-group-toggle:hover {
+      min-height: 23px;
+      padding: 1px 13px;
+      background: transparent;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .category-group-toggle:hover { background: #e5edf5; }
+    .category-group-symbol { color: var(--accent); }
+    .category-group-count { color: var(--muted); opacity: 1; }
+
+    .company-link { font-size: 14px; font-weight: 750; }
+    .role { color: var(--muted); }
+    .tagline { gap: 5px; margin-top: 7px; }
+    .company-edit-btn { margin-top: 7px; }
+
+    .pill,
+    .urgency-pill {
+      min-height: 22px;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .stage-grid { gap: 6px; }
+
+    .stage {
+      min-height: 38px;
+      padding: 5px 8px;
+      border-color: #e0e7ef;
+      border-radius: 8px;
+    }
+
+    .stage:hover {
+      border-color: #b8c9dc;
+      box-shadow: 0 2px 7px rgba(22, 36, 58, .07);
+      transform: translateY(-1px);
+    }
+
+    .stage.done {
+      border-color: #b8dfca;
+      background: #edf8f1;
+      color: #3f7655;
+    }
+
+    .stage.todo {
+      border-color: #e0e6ed;
+      background: #f6f8fa;
+      color: #6a7788;
+    }
+
+    .date-pill { min-height: 27px; }
+
+    .notes,
+    .notes-content {
+      color: #59677b;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .actions { gap: 5px; }
+
+    .actions [data-action="detail"] {
+      min-height: 48px;
+      border-radius: 9px;
+      font-size: 12px;
+    }
+
+    .row-document-heading {
+      margin-top: 7px;
+      font-size: 10px;
+      letter-spacing: .06em;
+    }
+
+    .row-document-links,
+    .row-document-missing { font-size: 11px; }
+
+    .panel,
+    .resource-card,
+    .empty {
+      border-color: #e0e7ef;
+      border-radius: 13px;
+      box-shadow: 0 6px 20px rgba(22, 36, 58, .045);
+    }
+
+    .btn:focus-visible,
+    .icon-btn:focus-visible,
+    .job-type-tab:focus-visible,
+    .stage:focus-visible {
+      outline: 3px solid rgba(23, 105, 170, .35);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 20px, 1600px); }
+      th, td { padding: 9px; }
+    }
+
   </style>
 </head>
 <body>
@@ -1651,7 +2139,7 @@
         <div class="document-row additional-document-heading">
           <input class="file-input-hidden" id="additionalDocumentInput" type="file" accept=".pdf,.doc,.docx,.txt,.rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/rtf">
           <div class="additional-documents-list" id="additionalDocuments"></div>
-          <button class="btn secondary doc-action-btn" id="addAdditionalDocumentBtn" type="button">+ Add another document</button>
+          <button class="btn secondary doc-action-btn document-upload-btn" id="addAdditionalDocumentBtn" type="button">Add another document</button>
         </div>
       </div>
 
@@ -1698,10 +2186,10 @@
     </header>
     <div class="resource-grid">
       <article class="resource-card">
-        <span class="resource-card-type">CV &amp; Cover Letter</span>
-        <h2>Michail Connor</h2>
-        <p>Offers a CV and cover letter optimisation package.</p>
-        <a class="resource-card-link" href="https://www.linkedin.com/in/michail-connor-a15346225/" target="_blank" rel="noopener noreferrer">View Michail’s LinkedIn <span aria-hidden="true">↗</span></a>
+        <span class="resource-card-type">Job Search Tracker</span>
+        <h2>Trackr</h2>
+        <p>Find out which roles are open, and their deadlines for applications. My 'NextStep Tracker' is designed to complement the use of Trackr, with matching company categories and job types across Finance, Tech, Engineering and Law.</p>
+        <a class="resource-card-link" href="https://the-trackr.com/trackers/" target="_blank" rel="noopener noreferrer">Explore Trackr’s trackers <span aria-hidden="true">↗</span></a>
       </article>
       <article class="resource-card">
         <span class="resource-card-type">Career Content &amp; Outreach</span>
@@ -1713,13 +2201,19 @@
         </div>
       </article>
       <article class="resource-card">
+        <span class="resource-card-type">CV &amp; Cover Letter</span>
+        <h2>Michail Connor</h2>
+        <p>Offers a CV and cover letter optimisation package.</p>
+        <a class="resource-card-link" href="https://www.linkedin.com/in/michail-connor-a15346225/" target="_blank" rel="noopener noreferrer">View Michail’s LinkedIn <span aria-hidden="true">↗</span></a>
+      </article>
+      <article class="resource-card">
         <span class="resource-card-type">CV Template</span>
         <h2>Jake’s Resume Template</h2>
         <p>An editable LaTeX CV template you can open and customise in Overleaf.</p>
         <a class="resource-card-link" href="https://www.overleaf.com/latex/templates/jakes-resume/syzfjbzwjncs" target="_blank" rel="noopener noreferrer">View the Overleaf template <span aria-hidden="true">↗</span></a>
       </article>
     </div>
-    <p class="resources-note">These resources are provided by their respective creators. Any paid or affiliate placements will be clearly labelled.</p>
+    <p class="resources-note">These resources are provided by their respective creators. Any paid or affiliate partnerships will be clearly marked with an asterisk (*).</p>
   </section>
 
   <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -1731,15 +2225,20 @@
           <label class="dialog-status-choice"><input type="radio" name="applicationStatus" value="Offer"><span>Offer</span></label>
           <label class="dialog-status-choice"><input type="radio" name="applicationStatus" value="Rejected"><span>Rejected</span></label>
         </div>
-        <button class="btn" id="dialogSaveBtn" type="submit" form="applicationForm">Save</button>
-        <button class="icon-btn" id="closeBtn" type="button" title="Close">x</button>
+        <div class="dialog-head-actions">
+          <button class="btn" id="dialogSaveBtn" type="submit" form="applicationForm">Save</button>
+          <button class="icon-btn delete-icon-btn" id="deleteBtn" type="button" title="Delete application" aria-label="Delete application" style="display:none">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></svg>
+          </button>
+          <button class="icon-btn" id="closeBtn" type="button" title="Close" aria-label="Close">x</button>
+        </div>
       </div>
       <form id="applicationForm">
         <input type="hidden" id="appId">
         <div class="form-grid">
           <div class="field">
             <label for="companyInput">Company</label>
-            <input id="companyInput" required autocomplete="organization">
+            <input id="companyInput" required autocomplete="off">
           </div>
           <div class="field">
             <label for="roleInput">Role</label>
@@ -1769,7 +2268,7 @@
                 <button class="application-document-remove" type="button" data-remove-application-document="cv" aria-label="Remove CV" title="Remove CV">×</button>
                 <input class="file-input-hidden" id="applicationCvInput" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
                 <div class="application-document-picker">
-                  <button class="btn secondary doc-action-btn" type="button" data-pick-application-document="cv">Add CV</button>
+                  <button class="btn secondary doc-action-btn document-upload-btn" type="button" data-pick-application-document="cv">Add CV</button>
                   <span class="application-document-name" id="applicationCvName">No CV added</span>
                 </div>
               </div>
@@ -1777,7 +2276,7 @@
                 <button class="application-document-remove" type="button" data-remove-application-document="cover" aria-label="Remove cover letter" title="Remove cover letter">×</button>
                 <input class="file-input-hidden" id="applicationCoverInput" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
                 <div class="application-document-picker">
-                  <button class="btn secondary doc-action-btn" type="button" data-pick-application-document="cover">Add Cover Letter</button>
+                  <button class="btn secondary doc-action-btn document-upload-btn" type="button" data-pick-application-document="cover">Add Cover Letter</button>
                   <span class="application-document-name" id="applicationCoverName">No cover letter added</span>
                 </div>
               </div>
@@ -1792,6 +2291,7 @@
             <div class="stage-editor" id="stageEditor"></div>
             <div class="stage-actions">
               <button class="btn secondary" id="addStageBtn" type="button">+ Stage</button>
+              <button class="btn secondary" id="editStagesBtn" type="button">Edit Default Stages</button>
             </div>
           </div>
           <div class="field full">
@@ -1800,11 +2300,24 @@
           </div>
         </div>
         <div class="form-actions">
-          <button class="btn warning" id="deleteBtn" type="button">Delete</button>
+          <button class="btn warning delete-footer-btn" id="deleteFooterBtn" type="button" style="display:none">Delete</button>
           <button class="btn" type="submit">Save</button>
         </div>
       </form>
     </div>
+  </div>
+
+  <div class="stage-defaults-modal" id="stageDefaultsModal" aria-hidden="true">
+    <section class="stage-defaults-panel" role="dialog" aria-modal="true" aria-labelledby="stageDefaultsTitle">
+      <h2 id="stageDefaultsTitle">Edit Default Stages</h2>
+      <p>These names will be used for new applications and update the application you’re editing.</p>
+      <ul class="stage-default-list" id="stageDefaultsList" aria-label="Default stages"></ul>
+      <button class="btn secondary stage-defaults-add" id="addDefaultStageBtn" type="button">+ Add Stage</button>
+      <div class="stage-defaults-actions">
+        <button class="btn secondary" id="cancelStageDefaultsBtn" type="button">Cancel</button>
+        <button class="btn" id="saveStageDefaultsBtn" type="button">Save Stages</button>
+      </div>
+    </section>
   </div>
 
   <script>
@@ -1832,7 +2345,7 @@
     const savedTracker = localStorage.getItem(trackerSelectionKey);
     let activeTracker = Object.hasOwn(trackerStorageKeys, savedTracker) ? savedTracker : "finance";
     let storageKey = trackerStorageKeys[activeTracker];
-    const defaultStages = [
+    const builtInDefaultStages = [
       "CV Screening",
       "Online Assessments",
       "HireVue"
@@ -1873,7 +2386,7 @@
     "id": "9a4bb421-9cd6-48b0-bff9-f3d5790ba10c",
     "company": "Goldman Stanley",
     "role": "M&A Analyst",
-    "deadline": "2026-10-11",
+    "deadline": "2026-10-13",
     "priority": "Medium",
     "status": "In progress",
     "appliedAt": "2026-10-01",
@@ -1914,7 +2427,7 @@
     "id": "d54d3f3a-cfc3-44c9-92c0-cbec9149772e",
     "company": "Example Bank",
     "role": "Equity Research Graduate",
-    "deadline": "2026-10-08",
+    "deadline": "2026-10-10",
     "priority": "Medium",
     "status": "Offer",
     "appliedAt": "2026-09-28",
@@ -1959,7 +2472,7 @@
     "id": "00b20af7-88c2-4e3d-b69c-06d00d944dda",
     "company": "Example Capital Partners",
     "role": "Private Equity Analyst",
-    "deadline": "2026-10-05",
+    "deadline": "2026-10-07",
     "priority": "High",
     "status": "In progress",
     "appliedAt": "2026-09-29",
@@ -2006,7 +2519,7 @@
     "id": "581d1e24-e758-4031-bf79-25b7f014478c",
     "company": "Example Asset Management",
     "role": "Investment Analyst",
-    "deadline": "2026-10-14",
+    "deadline": "2026-10-16",
     "priority": "Low",
     "status": "In progress",
     "appliedAt": "2026-09-22",
@@ -2051,7 +2564,7 @@
     "id": "b0fa60ea-f881-4cf2-beba-9bcc3a060a44",
     "company": "Example Real Estate",
     "role": "Real Estate Graduate",
-    "deadline": "2026-10-12",
+    "deadline": "2026-10-14",
     "priority": "Medium",
     "status": "Rejected",
     "appliedAt": "2026-10-02",
@@ -2146,6 +2659,7 @@
     document.querySelector("#importBtn").addEventListener("click", () => fileInput.click());
     document.querySelector("#resetBtn").addEventListener("click", resetData);
     document.querySelector("#deleteBtn").addEventListener("click", deleteCurrent);
+    document.querySelector("#deleteFooterBtn").addEventListener("click", deleteCurrent);
     document.querySelectorAll("[data-pick-application-document]").forEach(button => {
       button.addEventListener("click", () => {
         const inputId = button.dataset.pickApplicationDocument === "cv" ? "#applicationCvInput" : "#applicationCoverInput";
@@ -2179,6 +2693,23 @@
       });
     });
     document.querySelector("#addStageBtn").addEventListener("click", addStageToEditor);
+    document.querySelector("#editStagesBtn").addEventListener("click", editDefaultStages);
+    document.querySelector("#cancelStageDefaultsBtn").addEventListener("click", closeDefaultStagesEditor);
+    document.querySelector("#saveStageDefaultsBtn").addEventListener("click", saveDefaultStages);
+    document.querySelector("#addDefaultStageBtn").addEventListener("click", () => {
+      const list = document.querySelector("#stageDefaultsList");
+      list.appendChild(makeDefaultStageRow("New Stage"));
+      const inputs = list.querySelectorAll("input");
+      inputs[inputs.length - 1].focus();
+      inputs[inputs.length - 1].select();
+    });
+    document.querySelector("#stageDefaultsList").addEventListener("click", event => {
+      const removeButton = event.target.closest("[data-remove-default-stage]");
+      if (removeButton) removeButton.closest(".stage-default-row").remove();
+    });
+    document.querySelector("#stageDefaultsModal").addEventListener("click", event => {
+      if (event.target.id === "stageDefaultsModal") closeDefaultStagesEditor();
+    });
     document.querySelector("#searchInput").addEventListener("input", render);
     document.querySelector("#statusFilter").addEventListener("change", render);
     document.querySelector("#sortSelect").addEventListener("change", render);
@@ -2333,8 +2864,83 @@
       return date.toISOString().slice(0, 10);
     }
 
+    function getDefaultStageNames() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(`${trackerStorageKeys[activeTracker]}-default-stages`) || "null");
+        if (Array.isArray(saved) && saved.length) {
+          const names = saved.map(name => String(name).trim()).filter(Boolean);
+          if (names.length) return names;
+        }
+      } catch {}
+      return [...builtInDefaultStages];
+    }
+
     function makeDefaultStages() {
-      return defaultStages.map((name, index) => ({ name, status: index === 0 ? "todo" : "todo" }));
+      return getDefaultStageNames().map(name => ({ name, status: "todo" }));
+    }
+
+    function editDefaultStages() {
+      const names = getDefaultStageNames();
+      renderDefaultStageList(names);
+      const modal = document.querySelector("#stageDefaultsModal");
+      modal.dataset.originalNames = JSON.stringify(names);
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      document.querySelector("#stageDefaultsList input")?.focus();
+    }
+
+    function makeDefaultStageRow(name) {
+      const row = document.createElement("li");
+      row.className = "stage-default-row";
+      row.innerHTML = `
+        <span class="stage-default-bullet" aria-hidden="true">•</span>
+        <input type="text" value="${escapeAttribute(name)}" aria-label="Default stage name">
+        <button class="icon-btn remove-stage" type="button" data-remove-default-stage aria-label="Remove default stage" title="Remove stage">×</button>
+      `;
+      return row;
+    }
+
+    function renderDefaultStageList(names) {
+      const list = document.querySelector("#stageDefaultsList");
+      list.innerHTML = "";
+      names.forEach(name => list.appendChild(makeDefaultStageRow(name)));
+    }
+
+    function closeDefaultStagesEditor() {
+      const modal = document.querySelector("#stageDefaultsModal");
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function saveDefaultStages() {
+      const names = [...document.querySelectorAll("#stageDefaultsList input")]
+        .map(input => input.value.trim()).filter(Boolean);
+      if (!names.length) {
+        alert("Add at least one stage name.");
+        return;
+      }
+      const defaultsModal = document.querySelector("#stageDefaultsModal");
+      const originalNames = JSON.parse(defaultsModal.dataset.originalNames || "[]");
+      localStorage.setItem(`${trackerStorageKeys[activeTracker]}-default-stages`, JSON.stringify(names));
+      if (document.querySelector("#modal").classList.contains("open")) {
+        const currentStages = [...stageEditor.querySelectorAll(".stage-row")].map(row => ({
+          name: row.querySelector("[data-stage-name]").value.trim(),
+          status: readStageEditorStatus(row)
+        }));
+        const currentByName = new Map(currentStages.map(stage => [stage.name.toLowerCase(), stage]));
+        const originalSet = new Set(originalNames.map(name => name.toLowerCase()));
+        const updatedStages = names.map(name => ({
+          name,
+          status: currentByName.get(name.toLowerCase())?.status || "todo"
+        }));
+        const applicationSpecificStages = currentStages.filter(stage => !originalSet.has(stage.name.toLowerCase()));
+        renderStageEditor([...updatedStages, ...applicationSpecificStages]);
+      }
+      closeDefaultStagesEditor();
+    }
+
+    function readStageEditorStatus(row) {
+      return row.querySelector('[data-status-toggle][aria-pressed="true"]')?.dataset.status || "todo";
     }
 
     function makeDefaultChecklist() {
@@ -2388,6 +2994,26 @@
           }
         }
         localStorage.setItem(sampleDeadlineMigrationKey, "done");
+      }
+      // Advance the current Finance sample deadlines two days once for existing browser data.
+      const sampleDeadlineMigrationV2Key = `${storageKey}-sample-deadlines-v2`;
+      if (!localStorage.getItem(sampleDeadlineMigrationV2Key)) {
+        const sampleDeadlineShiftsV2 = [
+          ["Goldman Stanley", "M&A Analyst", "2026-10-11", "2026-10-13"],
+          ["Example Bank", "Equity Research Graduate", "2026-10-08", "2026-10-10"],
+          ["Example Capital Partners", "Private Equity Analyst", "2026-10-05", "2026-10-07"],
+          ["Example Asset Management", "Investment Analyst", "2026-10-14", "2026-10-16"],
+          ["Example Real Estate", "Real Estate Graduate", "2026-10-12", "2026-10-14"]
+        ];
+        for (const [company, role, previousDeadline, nextDeadline] of sampleDeadlineShiftsV2) {
+          const existing = apps.find(app => app.company === company && app.role === role);
+          if (existing?.deadline === previousDeadline) {
+            existing.deadline = nextDeadline;
+            existing.priority = getUrgency(nextDeadline);
+            changed = true;
+          }
+        }
+        localStorage.setItem(sampleDeadlineMigrationV2Key, "done");
       }
       // Earlier sector switching defaulted records without a job type to the first tab.
       // Move the four original Finance examples back to Graduate Programmes if that happened.
@@ -2744,8 +3370,10 @@
         stages: makeDefaultStages()
       };
       document.querySelector("#modalTitle").textContent = editingId ? "Edit Application" : "Add Application";
+      document.querySelector("#editStagesBtn").style.display = editingId ? "none" : "";
       document.querySelector(`input[name="applicationStatus"][value="${normalizeStatus(app.status)}"]`).checked = true;
       document.querySelector("#deleteBtn").style.display = editingId ? "" : "none";
+      document.querySelector("#deleteFooterBtn").style.display = editingId ? "" : "none";
       document.querySelector("#applicationCvInput").value = "";
       document.querySelector("#applicationCoverInput").value = "";
       document.querySelector("#applicationCvInput").dataset.removeExisting = "false";
@@ -2791,15 +3419,22 @@
       stages.forEach((stage, index) => {
         const row = document.createElement("div");
         row.className = "stage-row";
+        const status = stage.status === "done" ? "done" : "todo";
         row.innerHTML = `
           <input data-stage-name="${index}" value="${escapeAttribute(stage.name)}" aria-label="Stage name">
-          <select data-stage-status="${index}" aria-label="Stage status">
-            <option value="todo">To do</option>
-            <option value="done">Done</option>
-          </select>
+          <div class="stage-status-toggle" role="group" aria-label="Status for ${escapeAttribute(stage.name)}">
+            <button type="button" data-status-toggle data-status="todo" aria-pressed="${status === "todo"}">To do</button>
+            <button type="button" data-status-toggle data-status="done" aria-pressed="${status === "done"}">Done</button>
+          </div>
           <button class="icon-btn remove-stage" type="button" title="Remove stage" data-remove-stage>X</button>
         `;
-        row.querySelector("select").value = stage.status;
+        row.querySelectorAll("[data-status-toggle]").forEach(button => {
+          button.addEventListener("click", () => {
+            row.querySelectorAll("[data-status-toggle]").forEach(option => {
+              option.setAttribute("aria-pressed", String(option === button));
+            });
+          });
+        });
         row.querySelector("[data-remove-stage]").addEventListener("click", () => {
           row.remove();
         });
@@ -2810,7 +3445,7 @@
     function addStageToEditor() {
       const stages = [...stageEditor.querySelectorAll(".stage-row")].map(row => ({
         name: row.querySelector("[data-stage-name]").value.trim(),
-        status: row.querySelector("[data-stage-status]").value
+        status: readStageEditorStatus(row)
       }));
       stages.push({ name: "New Stage", status: "todo" });
       renderStageEditor(stages);
@@ -2834,7 +3469,7 @@
       const stages = [...stageEditor.querySelectorAll(".stage-row")]
         .map(row => ({
           name: row.querySelector("[data-stage-name]").value.trim(),
-          status: row.querySelector("[data-stage-status]").value
+          status: readStageEditorStatus(row)
         }))
         .filter(stage => stage.name);
 
@@ -3109,7 +3744,7 @@
       const label = type === "cv" ? "CV" : "Cover Letter";
       const inputId = type === "cv" ? "cvFileInput" : "coverFileInput";
       if (!documentData) {
-        holder.innerHTML = `<button class="btn secondary" type="button" data-add-document="${type}">Add ${label}</button>`;
+        holder.innerHTML = `<button class="btn secondary doc-action-btn document-upload-btn" type="button" data-add-document="${type}">Add ${label}</button>`;
         holder.querySelector("[data-add-document]").addEventListener("click", () => {
           document.querySelector(`#${inputId}`).click();
         });
