@@ -1,27 +1,26 @@
-# Finance Application Tracker
+# NextStep Tracker
 
-A simple browser-based tool for tracking job applications, deadlines, interview preparation, and the documents used (CV, Cover Letter) for each application.
+A browser-based application tracker for keeping job applications, deadlines, interview stages, preparation notes, and application documents organised.
 
-**[Open the application tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)** (only for use on a laptop / computer)
+**[Open NextStep Tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)**  
+Designed for use on a laptop or desktop computer only.
 
 Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 
 ## Features
 
-- **Track applications:** Record roles, deadlines, statuses, and interview stages.
-
-- **Find applications:** Search by company, role, or keyword; filter by status or deadline; sort by deadline, role, or firm type.
-
-- **Prepare:** Keep job description links, documents used (CV, Cover Letter), notes and checklists for each application together in one place.
+- **Four trackers:** Finance, Tech, Engineering, and Law.
+- **Track applications:** Save company details, roles, categories, deadlines, statuses, and application stages.
+- **Stay organised:** Search and filter applications, sort by deadline or other details, and collapse company categories.
+- **Prepare for interviews:** Keep job description links, notes, checklists, and the CV and cover letter used for each application together.
+- **Useful Resources:** Find links to career support and content from people in the graduate careers space.
+- **Manage your data:** Add, edit, delete, import, export, or reset applications.
 
 ## Getting started
 
-- Open the application tracker using the link above.
-- Explore its features.
-- Delete the example applications and start adding your own.
-- Save the link somewhere, or press "Add Bookmark To Favourites" (for easy access). Your changes save automatically in your browser on your computer.
+1. Open the tracker using the link above.
+2. Choose a tracker.
+3. Delete the example applications and add your own.
+4. Bookmark the link for easy access.
 
-## How your data is saved
-
-- Your changes stay in your browser and are **not visible to other people**. They do not sync to other devices. Use **Export** to save a backup file; **Import** loads a backup into your browser and replaces its current tracker data.
-- Basically, nobody else can see your edited version of the tracker.
+Your application data is saved in your browser on your computer. It does not automatically sync to other browsers or devices, so export a backup if you want to keep a separate copy.
