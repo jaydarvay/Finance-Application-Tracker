@@ -9,10 +9,10 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 ## Features
 
 - **Four trackers:** Finance, Tech, Engineering, and Law.
-- **Track applications:** Save company details, roles, categories, deadlines, statuses, and application stages.
-- **Stay organised:** Search and filter applications, sort by deadline or other details, and collapse company categories.
+- **Track applications:** Input company details, roles, deadlines, notes, documents (CV, CL) and application stages.
+- **Stay organised:** Search and filter applications, sort by deadline or other details, and collapse company categories using the +/-.
 - **Prepare for interviews:** Keep job description links, notes, checklists, and the CV and cover letter used for each application together.
-- **Useful Resources:** Find links to career support and content from people in the graduate careers space.
+- **Useful Resources:** Find links to career support and content from professionals in the careers space.
 - **Manage your data:** Add, edit, delete, import, export, or reset applications.
 
 ## Getting started
@@ -20,6 +20,7 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 1. Open the tracker using the link above.
 2. Choose a tracker.
 3. Delete the example applications and add your own.
-4. Bookmark the link for easy access.
+4. **Bookmark** the link for easy access.
+5. **Your changes save automatically**
 
 Your application data is saved in your browser on your computer. To keep a backup or move your applications to another device, use Export to save a copy, then Import that file on the other device.
