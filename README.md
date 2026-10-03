@@ -21,6 +21,6 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 2. Choose a tracker.
 3. Delete the example applications and add your own.
 4. **Bookmark** the link for easy access.
-5. **Your changes save automatically**
+5. **Your changes save automatically.**
 
 Your application data is saved in your browser on your computer. To keep a backup or move your applications to another device, use Export to save a copy, then Import that file on the other device.
