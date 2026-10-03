@@ -2,8 +2,7 @@
 
 A browser-based application tracker for keeping job applications, deadlines, interview stages, preparation notes, and application documents organised.
 
-**[Open NextStep Tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)**  
-Designed for use on a laptop or desktop computer only.
+**[Open NextStep Tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)**  (Designed for use on a laptop or desktop computer only)
 
 Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 
