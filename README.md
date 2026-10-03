@@ -22,4 +22,4 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/).
 3. Delete the example applications and add your own.
 4. Bookmark the link for easy access.
 
-Your application data is saved in your browser on your computer. It does not automatically sync to other browsers or devices, so export a backup if you want to keep a separate copy.
+Your application data is saved in your browser on your computer. To keep a backup or move your applications to another device, use Export to save a copy, then Import that file on the other device.
