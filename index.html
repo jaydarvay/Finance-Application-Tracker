@@ -54,7 +54,8 @@
       grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: center;
       gap: 16px;
-      background: linear-gradient(110deg, #142033 0%, #1a2d47 48%, #244c78 100%);
+      background-color: #142033;
+      background-image: linear-gradient(110deg, #142033 0%, #1a2d47 48%, #244c78 100%);
       border-bottom: 3px solid #0A66C2;
     }
 
@@ -156,9 +157,9 @@
     .tracker-option {
       min-height: 38px;
       padding: 0 14px;
-      border: 1px solid rgba(255, 255, 255, .28);
+      border: 1px solid rgba(255, 255, 255, .48);
       border-radius: 999px;
-      background: transparent;
+      background: rgba(255, 255, 255, .06);
       color: #f4f7fb;
       font-weight: 700;
       transition: background-color .15s ease, color .15s ease, border-color .15s ease;
@@ -187,7 +188,7 @@
       justify-self: center;
       padding: 8px 4px;
       background: transparent;
-      color: #c3ccda;
+      color: #e1e8f1;
       font-size: 15px;
       font-weight: 700;
       white-space: nowrap;
@@ -2342,6 +2343,52 @@
       law: ["Training Contracts", "Vacation Schemes", "Non-Law Internships", "First Year Schemes"]
     };
     const trackerSelectionKey = `${baseStorageKey}-selected-tracker`;
+    const documentDatabaseName = `${baseStorageKey}-documents`;
+    let documentDatabasePromise;
+    function openDocumentDatabase() {
+      if (!documentDatabasePromise) documentDatabasePromise = new Promise((resolve, reject) => {
+        const request = indexedDB.open(documentDatabaseName, 1);
+        request.onupgradeneeded = () => request.result.createObjectStore("documents");
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      return documentDatabasePromise;
+    }
+    async function storeDocumentBlob(key, blob) {
+      const db = await openDocumentDatabase();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction("documents", "readwrite");
+        tx.objectStore("documents").put(blob, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error("Document save was cancelled"));
+      });
+    }
+    async function readDocumentBlob(key) {
+      const db = await openDocumentDatabase();
+      return new Promise((resolve, reject) => {
+        const request = db.transaction("documents", "readonly").objectStore("documents").get(key);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+    }
+    async function deleteDocumentBlob(key) {
+      if (!key) return;
+      const db = await openDocumentDatabase();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction("documents", "readwrite");
+        tx.objectStore("documents").delete(key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+    function documentBlobFromDataUrl(dataUrl, mime) {
+      const [header, encoded] = String(dataUrl).split(",", 2);
+      const binary = atob(encoded || "");
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mime || header.match(/^data:([^;]+)/)?.[1] || "application/octet-stream" });
+    }
     const savedTracker = localStorage.getItem(trackerSelectionKey);
     let activeTracker = Object.hasOwn(trackerStorageKeys, savedTracker) ? savedTracker : "finance";
     let storageKey = trackerStorageKeys[activeTracker];
@@ -2634,11 +2681,12 @@
       if (!option) return;
       activeTracker = option.dataset.tracker;
       updateTrackerSwitcher();
-      localStorage.setItem(trackerSelectionKey, activeTracker);
+      saveToBrowserStorage(trackerSelectionKey, activeTracker);
       storageKey = trackerStorageKeys[activeTracker];
       companyCategories = loadCompanyCategories(activeTracker);
       collapsedCategoriesStorageKey = `${storageKey}-collapsed-company-categories`;
       applications = loadApplications();
+      migrateLegacyDocuments();
       if (activeTracker !== "law") applications.forEach(app => addCompanyCategory(app.companyCategory));
       collapsedCategories = loadCollapsedCategories();
       editingId = null;
@@ -2749,6 +2797,7 @@
     form.addEventListener("submit", saveFromForm);
 
     render();
+    migrateLegacyDocuments();
 
     function updateTrackerSwitcher() {
       document.querySelectorAll(".tracker-option").forEach(option => {
@@ -2781,7 +2830,7 @@
         companyCategories.push(savedLabel);
         const defaults = trackerCategoryOptions[activeTracker];
         const custom = companyCategories.filter(item => !defaults.includes(item));
-        localStorage.setItem(`${storageKey}-custom-company-categories`, JSON.stringify(custom));
+        saveToBrowserStorage(`${storageKey}-custom-company-categories`, JSON.stringify(custom));
       }
       const select = document.querySelector("#categoryInput");
       if (select && ![...select.options].some(option => option.value.toLowerCase() === savedLabel.toLowerCase())) {
@@ -2921,7 +2970,7 @@
       }
       const defaultsModal = document.querySelector("#stageDefaultsModal");
       const originalNames = JSON.parse(defaultsModal.dataset.originalNames || "[]");
-      localStorage.setItem(`${trackerStorageKeys[activeTracker]}-default-stages`, JSON.stringify(names));
+      if (!saveToBrowserStorage(`${trackerStorageKeys[activeTracker]}-default-stages`, JSON.stringify(names))) return;
       if (document.querySelector("#modal").classList.contains("open")) {
         const currentStages = [...stageEditor.querySelectorAll(".stage-row")].map(row => ({
           name: row.querySelector("[data-stage-name]").value.trim(),
@@ -2956,7 +3005,7 @@
       try {
         const parsed = JSON.parse(saved);
         if (!Array.isArray(parsed)) return activeTracker === "finance" ? sampleData.map(normalizeApplication) : [];
-        const normalized = parsed.map(normalizeApplication).map(migrateExampleNotes);
+        const normalized = parsed.map(normalizeApplication);
         const changed = activeTracker === "finance" ? applyRequestedUpdates(normalized) : false;
         if (changed || normalized.some((app, index) => {
           const savedApp = parsed[index] || {};
@@ -2964,7 +3013,7 @@
             || app.notes !== (savedApp.notes || "")
             || app.url !== (savedApp.url || "");
         })) {
-          localStorage.setItem(storageKey, JSON.stringify(normalized));
+          saveToBrowserStorage(storageKey, JSON.stringify(normalized));
         }
         return normalized;
       } catch {
@@ -2993,7 +3042,7 @@
             changed = true;
           }
         }
-        localStorage.setItem(sampleDeadlineMigrationKey, "done");
+        saveToBrowserStorage(sampleDeadlineMigrationKey, "done");
       }
       // Advance the current Finance sample deadlines two days once for existing browser data.
       const sampleDeadlineMigrationV2Key = `${storageKey}-sample-deadlines-v2`;
@@ -3013,39 +3062,7 @@
             changed = true;
           }
         }
-        localStorage.setItem(sampleDeadlineMigrationV2Key, "done");
-      }
-      // Earlier sector switching defaulted records without a job type to the first tab.
-      // Move the four original Finance examples back to Graduate Programmes if that happened.
-      for (const example of sampleData.filter(item => item.company !== "Example Real Estate" && !item.jobType)) {
-        const existing = apps.find(app => app.company === example.company && app.role === example.role);
-        if (existing && existing.jobType === "Summer Internships") {
-          existing.jobType = "Graduate Programmes";
-          changed = true;
-        }
-      }
-      const goldman = apps.find(app => app.company === "Goldman Stanley");
-      if (goldman && goldman.status !== "In progress") {
-        goldman.status = "In progress";
-        changed = true;
-      }
-
-      const requested = sampleData.find(app => app.company === "Example Real Estate");
-      let example = apps.find(app => app.company === "Example Real Estate" && app.role === "Real Estate Graduate");
-      if (!example) {
-        example = normalizeApplication(requested);
-        apps.push(example);
-        changed = true;
-      } else {
-        const requiredFields = ["companyCategory", "jobType", "deadline", "status", "notes", "outcomeNotes", "stages"];
-        for (const field of requiredFields) {
-          const desired = field === "stages" ? JSON.stringify(requested[field]) : requested[field];
-          const current = field === "stages" ? JSON.stringify(example[field]) : example[field];
-          if (current !== desired) {
-            example[field] = field === "stages" ? requested[field].map(stage => ({ ...stage })) : desired;
-            changed = true;
-          }
-        }
+        saveToBrowserStorage(sampleDeadlineMigrationV2Key, "done");
       }
       return changed;
     }
@@ -3056,24 +3073,6 @@
       if (activeTracker === "law") return label || "Uncategorised";
       if (legacyCompanyCategoryMap[lowerLabel]) return legacyCompanyCategoryMap[lowerLabel];
       return companyCategories.find(option => option.toLowerCase() === lowerLabel) || label || (companyCategories.includes("Miscellaneous") ? "Miscellaneous" : companyCategories[0]);
-    }
-
-    function migrateExampleNotes(app) {
-      const reminder = "Add things you need to remember for the role. Salary, recruiter email, etc...";
-      const example = "Example: Revise financial modelling basics for the technical interview. Use the job description link above to refresh the company values.";
-      if (app.company === "Goldman Stanley" && app.role === "M&A Analyst" && app.notes === "Rejections automatically go to the bottom") {
-        app.notes = reminder;
-        app.url = "";
-      }
-      if (app.company === "Example Capital Partners" && app.role === "Private Equity Analyst" && app.notes === reminder) {
-        app.notes = example;
-        app.url = "https://www.linkedin.com/in/jaydarvay/";
-      }
-      if (app.company === "Example Asset Management" && app.role === "Investment Analyst" && app.notes === example) {
-        app.notes = "";
-        app.url = "";
-      }
-      return app;
     }
 
     function normalizeApplication(app) {
@@ -3089,12 +3088,8 @@
         companyCategory: normalizeCompanyCategory(app.companyCategory),
         jobType: jobTypes.includes(app.jobType) ? app.jobType : (jobTypes.includes("Graduate Programmes") ? "Graduate Programmes" : jobTypes[0]),
         url: app.url || "",
-        notes: ({
-          "Do technical prep for interview - revise financial modelling basics, Excel skills etc.": "Add things you need to remember for the role.",
-          "Prepare examples for teamwork, markets awareness, and why this division.": "This is where the job description link shows up as a hyperlink.",
-          "Tailor cover letter to portfolio construction and risk management.": "Example: Revise financial modelling basics for the technical interview, and use the job description link here for role requirements."
-        })[app.notes] || app.notes || "",
-        roleNotes: app.roleNotes === "yes yes" && app.company === "Example Capital Partners" && app.role === "Private Equity Analyst" ? "" : (app.roleNotes || ""),
+        notes: app.notes || "",
+        roleNotes: app.roleNotes || "",
         interviewNotes: app.interviewNotes || "",
         outcomeNotes: app.outcomeNotes || "",
         prepChecklist: Array.isArray(app.prepChecklist) && app.prepChecklist.length ? app.prepChecklist.map(item => ({
@@ -3103,7 +3098,7 @@
         })) : makeDefaultChecklist(),
         documents: app.documents || {},
         stages: Array.isArray(app.stages) && app.stages.length ? app.stages.map(stage => ({
-          name: stage.name === "Online Tests" ? "Online Assessments" : (stage.name || "Stage"),
+          name: stage.name || "Stage",
           status: stage.status === "done" ? "done" : "todo"
         })) : makeDefaultStages(),
         updatedAt: app.updatedAt || Date.now()
@@ -3111,7 +3106,18 @@
     }
 
     function persist() {
-      localStorage.setItem(storageKey, JSON.stringify(applications));
+      return saveToBrowserStorage(storageKey, JSON.stringify(applications));
+    }
+
+    function saveToBrowserStorage(key, value) {
+      try {
+        localStorage.setItem(key, value);
+        return true;
+      } catch (error) {
+        console.error("Could not save tracker data in browser storage.", error);
+        alert("Your browser could not save this change. Browser storage may be full. Your latest changes may not save if you close or reload this page. Try removing old applications or unnecessary documents (CV, CL) you no longer need.");
+        return false;
+      }
     }
 
     function loadCollapsedCategories() {
@@ -3124,7 +3130,7 @@
     }
 
     function persistCollapsedCategories() {
-      localStorage.setItem(collapsedCategoriesStorageKey, JSON.stringify([...collapsedCategories]));
+      saveToBrowserStorage(collapsedCategoriesStorageKey, JSON.stringify([...collapsedCategories]));
     }
 
     function render() {
@@ -3244,7 +3250,7 @@
       const notesHtml = buildNotesHtml(app);
       const cv = app.documents?.cv;
       const cover = app.documents?.cover;
-      const documentLink = (type, label, data) => data?.dataUrl
+      const documentLink = (type, label, data) => data?.name
         ? `<a class="row-document-link" href="#" data-open-row-document="${type}" title="Open ${escapeAttribute(data.name || label)}">${label}: <span class="row-document-check" aria-label="attached">✓</span></a>`
         : `<span class="row-document-missing">${label}: ${type === "cover" ? "Not added" : "not added"}</span>`;
       tr.innerHTML = `
@@ -3456,12 +3462,7 @@
     }
 
     function readApplicationDocument(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve({ name: file.name, type: file.type || "application/octet-stream", dataUrl: reader.result, uploadedAt: new Date().toISOString() });
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(file);
-      });
+      return { name: file.name, type: file.type || "application/octet-stream", blob: file, uploadedAt: new Date().toISOString() };
     }
 
     async function saveFromForm(event) {
@@ -3482,23 +3483,33 @@
         : addCompanyCategory(customCategory ? typedCategory : document.querySelector("#categoryInput").value);
 
       const existingApp = editingId ? applications.find(item => item.id === editingId) : null;
+      const targetAppId = editingId || crypto.randomUUID();
       const documents = { ...(existingApp?.documents || {}) };
+      const replacedDocumentKeys = [];
+      const pendingDocumentBlobs = [];
       try {
         const cvInput = document.querySelector("#applicationCvInput");
         const coverInput = document.querySelector("#applicationCoverInput");
         const cvFile = cvInput.files[0];
         const coverFile = coverInput.files[0];
-        if (cvInput.dataset.removeExisting === "true") delete documents.cv;
-        if (coverInput.dataset.removeExisting === "true") delete documents.cover;
-        if (cvFile) documents.cv = await readApplicationDocument(cvFile);
-        if (coverFile) documents.cover = await readApplicationDocument(coverFile);
+        for (const [type, input, file] of [["cv", cvInput, cvFile], ["cover", coverInput, coverFile]]) {
+          if (input.dataset.removeExisting === "true" || file) {
+            if (documents[type]?.storageId) replacedDocumentKeys.push(documents[type].storageId);
+            delete documents[type];
+          }
+          if (file) {
+            const storageId = `${activeTracker}:${targetAppId}:${type}:${crypto.randomUUID()}`;
+            documents[type] = { name: file.name, type: file.type || "application/octet-stream", uploadedAt: new Date().toISOString(), storageId };
+            pendingDocumentBlobs.push([storageId, file]);
+          }
+        }
       } catch {
         alert("A document could not be read. Please try selecting it again.");
         return;
       }
 
       const app = normalizeApplication({
-        id: editingId || crypto.randomUUID(),
+        id: targetAppId,
         company: document.querySelector("#companyInput").value.trim(),
         role: document.querySelector("#roleInput").value.trim(),
         deadline: document.querySelector("#deadlineUnknown").checked ? "" : document.querySelector("#deadlineInput").value,
@@ -3517,6 +3528,15 @@
         updatedAt: Date.now()
       });
 
+      try {
+        for (const [key, blob] of pendingDocumentBlobs) await storeDocumentBlob(key, blob);
+      } catch (error) {
+        console.error("Could not save uploaded document in IndexedDB.", error);
+        alert("Your browser could not save this document. Please try again or remove other documents to free browser storage.");
+        return;
+      }
+
+      const applicationsBeforeSave = applications;
       activeJobType = app.jobType;
       if (editingId) {
         applications = applications.map(item => item.id === editingId ? app : item);
@@ -3524,7 +3544,13 @@
         applications.unshift(app);
       }
 
-      persist();
+      if (!persist()) {
+        applications = applicationsBeforeSave;
+        await Promise.all(pendingDocumentBlobs.map(([key]) => deleteDocumentBlob(key)));
+        render();
+        return;
+      }
+      await Promise.all(replacedDocumentKeys.map(deleteDocumentBlob));
       closeEditor();
       render();
     }
@@ -3537,8 +3563,10 @@
       const app = applications.find(item => item.id === appId);
       if (!app) return;
       if (!confirm(`Delete ${app.company} from the tracker?`)) return;
+      const previousApplications = applications;
       applications = applications.filter(item => item.id !== appId);
-      persist();
+      if (!persist()) { applications = previousApplications; render(); return; }
+      Object.values(app.documents || {}).flatMap(value => Array.isArray(value) ? value : [value]).forEach(item => { if (item?.storageId) deleteDocumentBlob(item.storageId); });
       if (editingId === appId) closeEditor();
       if (detailId === appId) {
         detailId = null;
@@ -3551,9 +3579,11 @@
     function resetData() {
       if (!confirm("Are you sure you want to reset the tracker (you will remove all of your applications)?")) return;
       if (!confirm("You are 100% sure?")) return;
+      const oldApplications = applications;
       applications = activeTracker === "finance" ? sampleData.map(normalizeApplication) : [];
-      if (activeTracker === "finance") localStorage.setItem(`${storageKey}-sample-deadlines-v1`, "done");
-      persist();
+      if (activeTracker === "finance") saveToBrowserStorage(`${storageKey}-sample-deadlines-v1`, "done");
+      if (!persist()) { applications = oldApplications; render(); return; }
+      oldApplications.forEach(app => Object.values(app.documents || {}).flatMap(value => Array.isArray(value) ? value : [value]).forEach(item => { if (item?.storageId) deleteDocumentBlob(item.storageId); }));
       render();
     }
 
@@ -3702,39 +3732,43 @@
       app.interviewNotes = document.querySelector("#interviewNotesInput").value;
       app.outcomeNotes = document.querySelector("#outcomeNotesInput").value;
       app.updatedAt = Date.now();
-      persist();
+      return persist();
     }
 
     function saveDetails() {
       const app = applications.find(item => item.id === detailId);
       if (!app) return;
-      autosaveDetails();
+      if (!autosaveDetails()) return;
       app.prepChecklist = app.prepChecklist.filter(item => item.text.trim());
       app.updatedAt = Date.now();
-      persist();
+      if (!persist()) return;
       render();
       showView("tracker");
     }
 
-    function saveDocument(type, event) {
+    async function saveDocument(type, event) {
       const app = applications.find(item => item.id === detailId);
       const file = event.target.files[0];
       if (!app || !file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
+      const storageId = `${activeTracker}:${app.id}:${type}:${crypto.randomUUID()}`;
+      const previousKey = app.documents?.[type]?.storageId;
+      const previousDocument = app.documents?.[type];
+      try {
+        await storeDocumentBlob(storageId, file);
         app.documents = app.documents || {};
-        app.documents[type] = {
-          name: file.name,
-          type: file.type || "application/octet-stream",
-          dataUrl: reader.result,
-          uploadedAt: new Date().toISOString()
-        };
+        app.documents[type] = { name: file.name, type: file.type || "application/octet-stream", uploadedAt: new Date().toISOString(), storageId };
         app.updatedAt = Date.now();
-        persist();
+        if (!persist()) {
+          app.documents[type] = previousDocument;
+          if (!previousKey) await deleteDocumentBlob(storageId);
+          return;
+        }
+        if (previousKey && previousKey !== storageId) await deleteDocumentBlob(previousKey);
         renderDetail();
-        event.target.value = "";
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Could not save uploaded document in IndexedDB.", error);
+        alert("This document could not be saved in your browser. Please try again or remove other documents to free browser storage.");
+      } finally { event.target.value = ""; }
     }
 
     function renderDocument(type, selector) {
@@ -3762,24 +3796,30 @@
         document.querySelector(`#${inputId}`).click();
       });
       holder.querySelector("[data-remove-document]").addEventListener("click", () => {
+        const storageId = app.documents[type]?.storageId;
+        const previousDocument = app.documents[type];
         delete app.documents[type];
         app.updatedAt = Date.now();
-        persist();
+        if (persist()) deleteDocumentBlob(storageId);
+        else app.documents[type] = previousDocument;
         renderDetail();
       });
     }
 
-    function openSavedDocument(event, documentData) {
+    async function openSavedDocument(event, documentData) {
       event.preventDefault();
-      if (!documentData?.dataUrl) return;
-      const [metadata, encoded] = documentData.dataUrl.split(",", 2);
-      const mime = documentData.type || metadata.match(/^data:([^;]+)/)?.[1] || "application/octet-stream";
-      const binary = atob(encoded || "");
-      const bytes = new Uint8Array(binary.length);
-      for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
-      const objectUrl = URL.createObjectURL(new Blob([bytes], { type: mime }));
-      const opened = window.open(objectUrl, "_blank");
-      if (!opened) {
+      if (!documentData) return;
+      const opened = window.open("about:blank", "_blank");
+      let blob;
+      try {
+        blob = documentData.storageId ? await readDocumentBlob(documentData.storageId)
+          : documentData.dataUrl ? documentBlobFromDataUrl(documentData.dataUrl, documentData.type) : null;
+      } catch (error) { console.error("Could not read saved document.", error); }
+      if (!blob) { alert("This document could not be found in this browser. If it was saved in another browser or device, upload it here again."); return; }
+      const objectUrl = URL.createObjectURL(blob);
+      if (opened) {
+        opened.location.href = objectUrl;
+      } else {
         const downloadLink = document.createElement("a");
         downloadLink.href = objectUrl;
         downloadLink.download = documentData.name || "document";
@@ -3787,18 +3827,45 @@
       }
     }
 
-    function saveAdditionalDocument(event) {
+    async function migrateLegacyDocuments() {
+      let changed = false;
+      for (const app of applications) {
+        for (const [type, value] of Object.entries(app.documents || {})) {
+          const docs = Array.isArray(value) ? value : [value];
+          for (let index = 0; index < docs.length; index++) {
+            const item = docs[index];
+            if (!item?.dataUrl) continue;
+            const storageId = `${activeTracker}:${app.id}:${type}${Array.isArray(value) ? `:${index}:${crypto.randomUUID()}` : ""}`;
+            try {
+              await storeDocumentBlob(storageId, documentBlobFromDataUrl(item.dataUrl, item.type));
+              item.storageId = storageId;
+              delete item.dataUrl;
+              changed = true;
+            } catch (error) {
+              console.error("Could not move an existing document into IndexedDB.", error);
+              alert("An existing document could not be moved to IndexedDB. It remains in the tracker’s saved data; please export a backup before changing or removing it.");
+              return;
+            }
+          }
+        }
+      }
+      if (changed && !persist()) alert("Documents were copied to IndexedDB, but the tracker could not save their new references. Please reload the page before making further changes.");
+    }
+
+    async function saveAdditionalDocument(event) {
       const app = applications.find(item => item.id === detailId);
       const file = event.target.files[0];
       if (!app || !file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
+      const previous = pendingAdditionalDocumentIndex === null ? null : app.documents?.additional?.[pendingAdditionalDocumentIndex];
+      const storageId = `${activeTracker}:${app.id}:additional:${pendingAdditionalDocumentIndex ?? crypto.randomUUID()}`;
+      try {
+        await storeDocumentBlob(storageId, file);
         app.documents = app.documents || {};
         app.documents.additional = Array.isArray(app.documents.additional) ? app.documents.additional : [];
         const record = {
           name: file.name,
           type: file.type || "application/octet-stream",
-          dataUrl: reader.result,
+          storageId,
           uploadedAt: new Date().toISOString()
         };
         if (pendingAdditionalDocumentIndex === null) {
@@ -3808,11 +3875,13 @@
         }
         pendingAdditionalDocumentIndex = null;
         app.updatedAt = Date.now();
-        persist();
+        if (!persist()) { await deleteDocumentBlob(storageId); return; }
+        if (previous?.storageId) await deleteDocumentBlob(previous.storageId);
         renderDetail();
-        event.target.value = "";
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Could not save uploaded document in IndexedDB.", error);
+        alert("This document could not be saved in your browser. Please try again or remove other documents to free browser storage.");
+      } finally { event.target.value = ""; }
     }
 
     function renderAdditionalDocuments() {
@@ -3838,35 +3907,77 @@
       });
       holder.querySelectorAll("[data-remove-additional]").forEach(button => {
         button.addEventListener("click", () => {
-          app.documents.additional.splice(Number(button.dataset.removeAdditional), 1);
+          const [removed] = app.documents.additional.splice(Number(button.dataset.removeAdditional), 1);
           app.updatedAt = Date.now();
-          persist();
+          if (persist()) deleteDocumentBlob(removed?.storageId);
           renderDetail();
         });
       });
     }
 
-    function exportData() {
-      const blob = new Blob([JSON.stringify(applications, null, 2)], { type: "application/json" });
+    function blobAsDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function exportData() {
+      try {
+        const exported = await Promise.all(applications.map(async app => {
+          const copy = JSON.parse(JSON.stringify(app));
+          for (const value of Object.values(copy.documents || {})) {
+            const docs = Array.isArray(value) ? value : [value];
+            for (const item of docs) {
+              if (item?.storageId) {
+                const storedBlob = await readDocumentBlob(item.storageId);
+                if (!storedBlob) throw new Error(`Missing saved document: ${item.name || "document"}`);
+                item.dataUrl = await blobAsDataUrl(storedBlob);
+                delete item.storageId;
+              }
+            }
+          }
+          return copy;
+        }));
+      const blob = new Blob([JSON.stringify(exported, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       link.download = `finance-applications-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Could not export tracker backup.", error);
+        alert("The backup could not be created because a saved document could not be read. Please check your uploads and try again.");
+      }
     }
 
     function importData(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = async () => {
         try {
           const parsed = JSON.parse(reader.result);
           if (!Array.isArray(parsed)) throw new Error("Expected a list");
           applications = parsed.map(normalizeApplication);
+          for (const app of applications) {
+            for (const [type, value] of Object.entries(app.documents || {})) {
+              const docs = Array.isArray(value) ? value : [value];
+              for (let index = 0; index < docs.length; index++) {
+                const item = docs[index];
+                if (!item?.dataUrl) continue;
+                const storageId = `${activeTracker}:${app.id}:${type}${Array.isArray(value) ? `:${index}:${crypto.randomUUID()}` : ""}`;
+                await storeDocumentBlob(storageId, documentBlobFromDataUrl(item.dataUrl, item.type));
+                item.storageId = storageId;
+                delete item.dataUrl;
+              }
+            }
+          }
           if (activeTracker !== "law") applications.forEach(app => addCompanyCategory(app.companyCategory));
-          persist();
+          if (!persist()) throw new Error("Could not save imported tracker data");
           render();
         } catch {
           alert("The selected file could not be imported.");
