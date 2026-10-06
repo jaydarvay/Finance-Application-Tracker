@@ -2373,6 +2373,20 @@
       law: ["Training Contracts", "Vacation Schemes", "Non-Law Internships", "First Year Schemes"]
     };
     const trackerSelectionKey = `${baseStorageKey}-selected-tracker`;
+    const selectedJobTypeStorageKey = tracker => `${trackerStorageKeys[tracker]}-selected-job-type`;
+    function defaultJobTypeForTracker(tracker) {
+      const options = trackerJobTypeOptions[tracker] || [];
+      return options.includes("Graduate Programmes") ? "Graduate Programmes" : options[0];
+    }
+    function loadSelectedJobType(tracker) {
+      const options = trackerJobTypeOptions[tracker] || [];
+      try {
+        const saved = localStorage.getItem(selectedJobTypeStorageKey(tracker));
+        return options.includes(saved) ? saved : defaultJobTypeForTracker(tracker);
+      } catch {
+        return defaultJobTypeForTracker(tracker);
+      }
+    }
     const documentDatabaseName = `${baseStorageKey}-documents`;
     let documentDatabasePromise;
     function openDocumentDatabase() {
@@ -2693,7 +2707,7 @@
     let detailId = null;
     let pendingAdditionalDocumentIndex = null;
     let activeView = "tracker";
-    let activeJobType = "Graduate Programmes";
+    let activeJobType = loadSelectedJobType(activeTracker);
     let collapsedCategories = loadCollapsedCategories();
 
     const rows = document.querySelector("#applicationRows");
@@ -2721,7 +2735,7 @@
       collapsedCategories = loadCollapsedCategories();
       editingId = null;
       detailId = null;
-      activeJobType = "Graduate Programmes";
+      activeJobType = loadSelectedJobType(activeTracker);
       document.querySelector("#searchInput").value = "";
       document.querySelector("#sortSelect").value = "deadline";
       document.querySelector("#statusFilter").value = "all";
@@ -2795,6 +2809,7 @@
       const tab = event.target.closest("[data-job-type]");
       if (!tab) return;
       activeJobType = tab.dataset.jobType;
+      saveToBrowserStorage(selectedJobTypeStorageKey(activeTracker), activeJobType);
       render();
     });
     document.querySelector("#backToTrackerBtn").addEventListener("click", () => showView("tracker"));
