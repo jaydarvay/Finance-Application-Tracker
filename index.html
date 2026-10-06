@@ -289,11 +289,34 @@
       font-size: 15px;
     }
 
+    .toolbar-wrap {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
     .toolbar {
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
       gap: 10px;
+    }
+
+    .repository-link {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 16px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .repository-link:hover {
+      text-decoration: underline;
     }
 
     .btn {
@@ -1525,6 +1548,10 @@
         align-items: start;
       }
 
+      .toolbar-wrap {
+        align-items: flex-start;
+      }
+
       .toolbar {
         justify-content: flex-start;
       }
@@ -2045,12 +2072,15 @@
       <div>
         <h1 id="trackerTitle">Finance Tracker</h1>
       </div>
-      <div class="toolbar" aria-label="Application tools">
-        <button class="btn" id="addBtn" type="button" title="Add application">+ Add</button>
-        <button class="btn secondary" id="exportBtn" type="button" title="Export backup">Export</button>
-        <button class="btn secondary" id="importBtn" type="button" title="Import backup">Import</button>
-        <button class="btn warning" id="resetBtn" type="button" title="Reset sample data">Reset</button>
-        <input class="hidden-file" id="fileInput" type="file" accept="application/json">
+      <div class="toolbar-wrap">
+        <div class="toolbar" aria-label="Application tools">
+          <button class="btn" id="addBtn" type="button" title="Add application">+ Add</button>
+          <button class="btn secondary" id="exportBtn" type="button" title="Export backup">Export</button>
+          <button class="btn secondary" id="importBtn" type="button" title="Import backup">Import</button>
+          <button class="btn warning" id="resetBtn" type="button" title="Reset sample data">Reset</button>
+          <input class="hidden-file" id="fileInput" type="file" accept="application/json">
+        </div>
+        <a class="repository-link" href="https://github.com/jaydarvay/Finance-Application-Tracker" target="_blank" rel="noopener noreferrer">View the project on GitHub ↗</a>
       </div>
     </header>
 
@@ -3115,7 +3145,7 @@
         return true;
       } catch (error) {
         console.error("Could not save tracker data in browser storage.", error);
-        alert("Your browser could not save this change. Browser storage may be full. Your latest changes may not save if you close or reload this page. Try removing old applications or unnecessary documents (CV, CL) you no longer need.");
+        alert("Your browser could not save this change. Storage may be full, especially if you have uploaded lots of documents. Your latest changes may not save if you close or reload this page. Maybe remove rejections from your tracker, and remove unnecessary documents (CV, CL) you no longer need.");
         return false;
       }
     }
