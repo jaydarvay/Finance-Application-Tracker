@@ -1,4 +1,4 @@
-# NextStep Tracker
+# ![NextStep Tracker logo](TrackerLogoComplete.png) NextStep Tracker
 
 A browser-based application tracker for keeping job applications, deadlines, interview stages, preparation notes, and application documents organised.
 
