@@ -2047,6 +2047,21 @@
       .table-wrap table {
         min-width: 1120px;
       }
+
+      /* Use compact, side-by-side stage cards on phones instead of stacking full-width cards. */
+      .stage-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        min-width: 0;
+        gap: 4px;
+      }
+
+      .stage {
+        min-height: 34px;
+        padding: 4px 6px;
+      }
+
+      .stage span { font-size: 10px; }
+      .stage strong { font-size: 11px; }
     }
 
   </style>
