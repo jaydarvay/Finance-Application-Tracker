@@ -1577,6 +1577,24 @@
     }
 
     @media (max-width: 680px) {
+      /* Keep the add/edit dialog on a vertical-only touch axis on phones. */
+      .modal.open {
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+      }
+
+      .dialog {
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+      }
+
+      body.modal-scroll-locked {
+        position: fixed;
+        width: 100%;
+        overflow: hidden;
+      }
+
       .dialog-head {
         flex-wrap: wrap;
       }
@@ -1602,6 +1620,7 @@
       .job-type-tabs {
         flex-wrap: nowrap;
         overflow-x: auto;
+        margin-top: 14px;
         padding-bottom: 6px;
       }
 
@@ -2807,6 +2826,8 @@
     let activeView = "tracker";
     let activeJobType = loadSelectedJobType(activeTracker);
     let collapsedCategories = loadCollapsedCategories();
+    let modalScrollTop = 0;
+    let modalBodyLocked = false;
 
     const rows = document.querySelector("#applicationRows");
     const tableWrap = document.querySelector("#tableWrap");
@@ -3552,12 +3573,24 @@
       document.querySelector("#urlInput").value = app.url;
       document.querySelector("#notesInput").value = app.notes;
       renderStageEditor(app.stages);
+      if (window.matchMedia("(max-width: 680px)").matches) {
+        modalScrollTop = window.scrollY;
+        document.body.style.top = `-${modalScrollTop}px`;
+        document.body.classList.add("modal-scroll-locked");
+        modalBodyLocked = true;
+      }
       modal.classList.add("open");
       document.querySelector("#companyInput").focus();
     }
 
     function closeEditor() {
       modal.classList.remove("open");
+      if (modalBodyLocked) {
+        document.body.classList.remove("modal-scroll-locked");
+        document.body.style.removeProperty("top");
+        window.scrollTo(0, modalScrollTop);
+        modalBodyLocked = false;
+      }
       form.reset();
       updateCustomCategoryVisibility();
       editingId = null;
