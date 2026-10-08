@@ -2062,6 +2062,77 @@
 
       .stage span { font-size: 10px; }
       .stage strong { font-size: 11px; }
+
+      /* Keep tracker choices and LinkedIn together in one horizontally scrollable row. */
+      .tracker-switcher-actions {
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      .tracker-switcher-nav {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .tracker-switcher-label { display: none; }
+
+      .tracker-switcher-options {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .tracker-switcher-options::-webkit-scrollbar { display: none; }
+
+      .tracker-option {
+        flex: 0 0 auto;
+        min-height: 34px;
+        padding: 0 9px;
+        font-size: 12px;
+      }
+
+      .tracker-linkedin-link {
+        width: 34px;
+        height: 34px;
+      }
+
+      /* Fit all four toolbar actions on one line, with the GitHub link below. */
+      .toolbar-wrap {
+        width: 100%;
+        align-items: stretch;
+      }
+
+      .toolbar {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 6px;
+      }
+
+      .toolbar .btn {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+        padding: 0 5px;
+        font-size: clamp(12px, 3.2vw, 14px);
+        white-space: nowrap;
+      }
+
+      .repository-link {
+        align-self: flex-end;
+        margin-top: 8px;
+        font-size: 12px;
+      }
+
+      /* Give the deadline its own room so date pills stay inside their column. */
+      .col-company { width: 14%; }
+      .col-stages { width: 40%; }
+      .col-deadline { width: 18%; }
+      .col-notes { width: 16%; }
+      .col-actions { width: 12%; }
+
+      td.date { text-align: left; }
+      .date .date-pill { margin-left: 0; }
     }
 
   </style>
