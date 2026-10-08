@@ -2035,6 +2035,18 @@
     @media (max-width: 680px) {
       .shell { width: min(100% - 20px, 1600px); }
       th, td { padding: 9px; }
+
+      /* Keep the application table readable on phones; swipe sideways for other columns. */
+      .table-wrap {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+      }
+
+      .table-wrap table {
+        min-width: 1120px;
+      }
     }
 
   </style>
