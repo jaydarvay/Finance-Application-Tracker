@@ -276,6 +276,16 @@
       margin-bottom: 20px;
     }
 
+    .resources-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .resources-header > div { min-width: 0; }
+    .resources-header .btn { flex: 0 0 auto; }
+
     h1 {
       margin: 0;
       font-size: clamp(28px, 4vw, 46px);
@@ -1054,6 +1064,10 @@
       display: grid;
     }
 
+    .confirm-modal {
+      display: none;
+    }
+
     .dialog {
       width: min(860px, 100%);
       max-height: min(880px, calc(100vh - 36px));
@@ -1634,7 +1648,76 @@
       }
 
       .stage-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr) 42px;
+        gap: 6px;
+      }
+
+      .stage-row > input {
+        grid-column: 1 / -1;
+        min-width: 0;
+      }
+
+      .stage-row .stage-status-toggle {
+        grid-column: 1;
+        min-width: 0;
+      }
+
+      .stage-row .stage-status-toggle button {
+        min-height: 32px;
+        padding: 0 5px;
+        font-size: 13px;
+      }
+
+      .stage-row .remove-stage {
+        grid-column: 2;
+        grid-row: 2;
+        width: 38px;
+        min-width: 38px;
+        height: 38px;
+        padding: 0;
+        justify-self: end;
+      }
+
+      .confirm-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 20000;
+        display: none;
+        place-items: center;
+        padding: 20px;
+        background: rgba(12, 18, 28, .55);
+      }
+
+      .confirm-modal.open {
+        display: grid;
+      }
+
+      .confirm-dialog {
+        width: min(420px, 100%);
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: 0 20px 60px rgba(12, 18, 28, .28);
+      }
+
+      .confirm-dialog p {
+        margin: 0;
+        color: var(--ink);
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      .confirm-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .confirm-actions .btn {
+        width: auto;
+        min-width: 92px;
       }
 
       .application-documents-grid { grid-template-columns: 1fr; }
@@ -2052,7 +2135,10 @@
     }
 
     @media (max-width: 680px) {
-      .shell { width: min(100% - 20px, 1600px); }
+      .shell {
+        width: min(100% - 20px, 1600px);
+        padding-top: 15px;
+      }
       th, td { padding: 9px; }
 
       /* Keep the application table readable on phones; swipe sideways for other columns. */
@@ -2326,11 +2412,12 @@
   </section>
 
   <section class="shell view resources-view" id="resourcesView" aria-labelledby="resourcesTitle">
-    <header>
+    <header class="resources-header">
       <div>
         <h1 id="resourcesTitle">Useful Resources</h1>
         <p class="subtitle">A few external resources to support your applications and career planning.</p>
       </div>
+      <button class="btn secondary" id="backToTrackerFromResourcesBtn" type="button">Back</button>
     </header>
     <div class="resource-grid">
       <article class="resource-card">
@@ -2464,6 +2551,16 @@
       <div class="stage-defaults-actions">
         <button class="btn secondary" id="cancelStageDefaultsBtn" type="button">Cancel</button>
         <button class="btn" id="saveStageDefaultsBtn" type="button">Save Stages</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="confirm-modal" id="confirmModal" aria-hidden="true">
+    <section class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmMessage">
+      <p id="confirmMessage"></p>
+      <div class="confirm-actions">
+        <button class="btn secondary" id="confirmCancelBtn" type="button">Cancel</button>
+        <button class="btn" id="confirmAcceptBtn" type="button">OK</button>
       </div>
     </section>
   </div>
@@ -2839,6 +2936,7 @@
     updateCategoryInputForTracker();
     updateTrackerSwitcher();
     document.querySelector("#resourcesNavBtn").addEventListener("click", () => showView("resources"));
+    document.querySelector("#backToTrackerFromResourcesBtn").addEventListener("click", () => showView("tracker"));
     document.querySelector("#trackerSwitcher").addEventListener("click", event => {
       const option = event.target.closest("[data-tracker]");
       if (!option) return;
@@ -3573,25 +3671,69 @@
       document.querySelector("#urlInput").value = app.url;
       document.querySelector("#notesInput").value = app.notes;
       renderStageEditor(app.stages);
-      modalScrollTop = window.scrollY;
-      document.body.style.top = `-${modalScrollTop}px`;
-      document.body.classList.add("modal-scroll-locked");
-      modalBodyLocked = true;
+      lockPageScroll();
       modal.classList.add("open");
       document.querySelector("#companyInput").focus();
     }
 
     function closeEditor() {
       modal.classList.remove("open");
-      if (modalBodyLocked) {
-        document.body.classList.remove("modal-scroll-locked");
-        document.body.style.removeProperty("top");
-        window.scrollTo(0, modalScrollTop);
-        modalBodyLocked = false;
-      }
+      unlockPageScroll();
       form.reset();
       updateCustomCategoryVisibility();
       editingId = null;
+    }
+
+    function lockPageScroll() {
+      if (modalBodyLocked) return;
+      modalScrollTop = window.scrollY;
+      document.body.style.top = `-${modalScrollTop}px`;
+      document.body.classList.add("modal-scroll-locked");
+      modalBodyLocked = true;
+    }
+
+    function unlockPageScroll() {
+      if (!modalBodyLocked) return;
+      document.body.classList.remove("modal-scroll-locked");
+      document.body.style.removeProperty("top");
+      window.scrollTo(0, modalScrollTop);
+      modalBodyLocked = false;
+    }
+
+    function confirmAction(message) {
+      if (!window.matchMedia("(max-width: 680px)").matches) {
+        return Promise.resolve(window.confirm(message));
+      }
+
+      const confirmModal = document.querySelector("#confirmModal");
+      const cancelButton = document.querySelector("#confirmCancelBtn");
+      const acceptButton = document.querySelector("#confirmAcceptBtn");
+      const wasPageLocked = modalBodyLocked;
+      lockPageScroll();
+      document.querySelector("#confirmMessage").textContent = message;
+      confirmModal.classList.add("open");
+      confirmModal.setAttribute("aria-hidden", "false");
+
+      return new Promise(resolve => {
+        const finish = confirmed => {
+          confirmModal.classList.remove("open");
+          confirmModal.setAttribute("aria-hidden", "true");
+          cancelButton.removeEventListener("click", cancel);
+          acceptButton.removeEventListener("click", accept);
+          confirmModal.removeEventListener("click", cancelOnBackdrop);
+          if (!wasPageLocked) unlockPageScroll();
+          resolve(confirmed);
+        };
+        const cancel = () => finish(false);
+        const accept = () => finish(true);
+        const cancelOnBackdrop = event => {
+          if (event.target === confirmModal) cancel();
+        };
+        cancelButton.addEventListener("click", cancel);
+        acceptButton.addEventListener("click", accept);
+        confirmModal.addEventListener("click", cancelOnBackdrop);
+        cancelButton.focus();
+      });
     }
 
     function renderStageEditor(stages) {
@@ -3733,10 +3875,10 @@
       if (editingId) deleteApplication(editingId);
     }
 
-    function deleteApplication(appId) {
+    async function deleteApplication(appId) {
       const app = applications.find(item => item.id === appId);
       if (!app) return;
-      if (!confirm(`Delete ${app.company} from the tracker?`)) return;
+      if (!await confirmAction(`Delete ${app.company} from the tracker?`)) return;
       const previousApplications = applications;
       applications = applications.filter(item => item.id !== appId);
       if (!persist()) { applications = previousApplications; render(); return; }
@@ -3750,9 +3892,9 @@
       }
     }
 
-    function resetData() {
-      if (!confirm("Are you sure you want to reset the tracker (you will remove all of your applications)?")) return;
-      if (!confirm("You are 100% sure?")) return;
+    async function resetData() {
+      if (!await confirmAction("Are you sure you want to reset the tracker (you will remove all of your applications)?")) return;
+      if (!await confirmAction("You are 100% sure?")) return;
       const oldApplications = applications;
       applications = activeTracker === "finance" ? sampleData.map(normalizeApplication) : [];
       if (activeTracker === "finance") saveToBrowserStorage(`${storageKey}-sample-deadlines-v1`, "done");
