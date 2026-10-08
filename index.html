@@ -2600,6 +2600,7 @@
     };
     const trackerSelectionKey = `${baseStorageKey}-selected-tracker`;
     const selectedJobTypeStorageKey = tracker => `${trackerStorageKeys[tracker]}-selected-job-type`;
+    const filterPreferencesKey = tracker => `${trackerStorageKeys[tracker]}-filter-preferences`;
     function defaultJobTypeForTracker(tracker) {
       const options = trackerJobTypeOptions[tracker] || [];
       return options.includes("Graduate Programmes") ? "Graduate Programmes" : options[0];
@@ -2966,8 +2967,7 @@
       detailId = null;
       activeJobType = loadSelectedJobType(activeTracker);
       document.querySelector("#searchInput").value = "";
-      document.querySelector("#sortSelect").value = "deadline";
-      document.querySelector("#statusFilter").value = "all";
+      loadFilterPreferences(activeTracker);
       updateCategoryInputForTracker();
       showView("tracker");
       render();
@@ -3032,8 +3032,14 @@
       if (event.target.id === "stageDefaultsModal") closeDefaultStagesEditor();
     });
     document.querySelector("#searchInput").addEventListener("input", render);
-    document.querySelector("#statusFilter").addEventListener("change", render);
-    document.querySelector("#sortSelect").addEventListener("change", render);
+    document.querySelector("#statusFilter").addEventListener("change", () => {
+      saveFilterPreferences();
+      render();
+    });
+    document.querySelector("#sortSelect").addEventListener("change", () => {
+      saveFilterPreferences();
+      render();
+    });
     document.querySelector("#jobTypeTabs").addEventListener("click", event => {
       const tab = event.target.closest("[data-job-type]");
       if (!tab) return;
@@ -3070,6 +3076,7 @@
     });
     form.addEventListener("submit", saveFromForm);
 
+    loadFilterPreferences(activeTracker);
     render();
     migrateLegacyDocuments();
 
@@ -3392,6 +3399,29 @@
         alert("Your browser could not save this change. Storage may be full, especially if you have uploaded lots of documents. Your latest changes may not save if you close or reload this page. Maybe remove rejections from your tracker, and remove unnecessary documents (CV, CL) you no longer need.");
         return false;
       }
+    }
+
+    function loadFilterPreferences(tracker) {
+      let saved = {};
+      try {
+        saved = JSON.parse(localStorage.getItem(filterPreferencesKey(tracker)) || "{}");
+      } catch {
+        saved = {};
+      }
+
+      const sortSelect = document.querySelector("#sortSelect");
+      const statusFilter = document.querySelector("#statusFilter");
+      const validSort = [...sortSelect.options].some(option => option.value === saved.sort);
+      const validStatus = [...statusFilter.options].some(option => option.value === saved.status);
+      sortSelect.value = validSort ? saved.sort : "deadline";
+      statusFilter.value = validStatus ? saved.status : "all";
+    }
+
+    function saveFilterPreferences() {
+      saveToBrowserStorage(filterPreferencesKey(activeTracker), JSON.stringify({
+        sort: document.querySelector("#sortSelect").value,
+        status: document.querySelector("#statusFilter").value
+      }));
     }
 
     function loadCollapsedCategories() {
