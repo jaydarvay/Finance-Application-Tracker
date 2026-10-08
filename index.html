@@ -1063,6 +1063,12 @@
       box-shadow: 0 28px 80px rgba(12, 18, 28, 0.28);
     }
 
+    body.modal-scroll-locked {
+      position: fixed;
+      width: 100%;
+      overflow: hidden;
+    }
+
     .dialog-head {
       position: sticky;
       top: 0;
@@ -1589,12 +1595,6 @@
         touch-action: pan-y;
       }
 
-      body.modal-scroll-locked {
-        position: fixed;
-        width: 100%;
-        overflow: hidden;
-      }
-
       .dialog-head {
         flex-wrap: wrap;
       }
@@ -1620,7 +1620,7 @@
       .job-type-tabs {
         flex-wrap: nowrap;
         overflow-x: auto;
-        margin-top: 14px;
+        margin-top: 30px;
         padding-bottom: 6px;
       }
 
@@ -3573,12 +3573,10 @@
       document.querySelector("#urlInput").value = app.url;
       document.querySelector("#notesInput").value = app.notes;
       renderStageEditor(app.stages);
-      if (window.matchMedia("(max-width: 680px)").matches) {
-        modalScrollTop = window.scrollY;
-        document.body.style.top = `-${modalScrollTop}px`;
-        document.body.classList.add("modal-scroll-locked");
-        modalBodyLocked = true;
-      }
+      modalScrollTop = window.scrollY;
+      document.body.style.top = `-${modalScrollTop}px`;
+      document.body.classList.add("modal-scroll-locked");
+      modalBodyLocked = true;
       modal.classList.add("open");
       document.querySelector("#companyInput").focus();
     }
