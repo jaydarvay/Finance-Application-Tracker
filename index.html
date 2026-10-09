@@ -2155,6 +2155,28 @@
         white-space: nowrap;
       }
 
+      #detailView .detail-head {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      #detailView .detail-title {
+        width: 100%;
+        min-width: 0;
+      }
+
+      #detailView .detail-head-actions {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      #detailView .detail-head-actions .btn {
+        width: auto;
+        flex: 0 0 auto;
+      }
+
       th, td { padding: 9px; }
 
       /* Keep the application table readable on phones; swipe sideways for other columns. */
@@ -2186,6 +2208,8 @@
 
       /* Keep tracker choices and LinkedIn together in one horizontally scrollable row. */
       .tracker-switcher-actions {
+        position: relative;
+        top: -4px;
         justify-content: flex-start;
         gap: 8px;
       }
@@ -2202,6 +2226,11 @@
         flex-wrap: nowrap;
         overflow-x: auto;
         scrollbar-width: none;
+      }
+
+      .resources-nav-link {
+        position: relative;
+        top: -3px;
       }
 
       .tracker-switcher-options::-webkit-scrollbar { display: none; }
@@ -2251,7 +2280,7 @@
 
       .mobile-meta-row {
         position: relative;
-        top: -2px;
+        top: 11px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -2266,16 +2295,40 @@
       }
 
       .mobile-experience-note {
-        color: var(--muted);
+        padding: 4px 7px;
+        border: 1px solid #b9d8f2;
+        border-radius: 7px;
+        background: #eaf4ff;
+        color: #1769aa;
         font-size: clamp(10px, 3vw, 12px);
         font-weight: 650;
+        line-height: 1.2;
       }
 
       .repository-link-desktop { display: none; }
 
+      .application-document-picker .btn.secondary.document-upload-btn {
+        width: 190px;
+        flex: 0 0 190px;
+        padding-right: 10px;
+        padding-left: 10px;
+        white-space: nowrap;
+      }
+
       .job-type-tabs {
         position: relative;
-        top: -5px;
+        top: -13.5px;
+        margin-bottom: 14px;
+      }
+
+      #jobTypeTabs[data-tracker="finance"] [data-job-type="Graduate Programmes"] {
+        order: -1;
+      }
+
+      #trackerView > .controls,
+      #trackerView > .table-wrap {
+        position: relative;
+        top: -7.5px;
       }
 
       /* Give the deadline its own room so date pills stay inside their column. */
@@ -2333,7 +2386,7 @@
           <input class="hidden-file" id="fileInput" type="file" accept="application/json">
         </div>
         <div class="mobile-meta-row">
-          <span class="mobile-experience-note">Best experienced on computers</span>
+          <span class="mobile-experience-note">Best experienced on a computer</span>
           <a class="repository-link" href="https://github.com/jaydarvay/Finance-Application-Tracker" target="_blank" rel="noopener noreferrer"><span class="repository-link-desktop">View the project on GitHub ↗</span><span class="repository-link-mobile">View project on GitHub</span></a>
         </div>
       </div>
@@ -3170,6 +3223,7 @@
       jobTypes = trackerJobTypeOptions[activeTracker];
       if (!jobTypes.includes(activeJobType)) activeJobType = jobTypes.includes("Graduate Programmes") ? "Graduate Programmes" : jobTypes[0];
       const tabs = document.querySelector("#jobTypeTabs");
+      tabs.dataset.tracker = activeTracker;
       tabs.innerHTML = "";
       jobTypes.forEach(type => {
         const button = document.createElement("button");
@@ -3755,7 +3809,10 @@
       renderStageEditor(app.stages);
       lockPageScroll();
       modal.classList.add("open");
-      document.querySelector("#companyInput").focus();
+      const companyInput = document.querySelector("#companyInput");
+      const isMobile = window.matchMedia("(max-width: 680px)").matches;
+      if (!isMobile) companyInput.focus();
+      else document.activeElement?.blur();
     }
 
     function closeEditor() {
