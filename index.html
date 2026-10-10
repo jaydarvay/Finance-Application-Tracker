@@ -421,6 +421,8 @@
       white-space: nowrap;
     }
 
+    .job-type-tab-mobile-label { display: none; }
+
     .job-type-tab:hover {
       filter: brightness(0.94);
     }
@@ -561,6 +563,13 @@
       padding: 0;
       accent-color: var(--accent);
     }
+
+    .deadline-input-wrap {
+      position: relative;
+      min-width: 0;
+    }
+
+    .deadline-today-suggestion { display: none; }
 
     label {
       color: var(--muted);
@@ -1635,6 +1644,29 @@
         grid-template-columns: 1fr;
       }
 
+      .form-grid > .field { min-width: 0; }
+      #deadlineInput { width: 100%; min-width: 0; max-width: 100%; }
+
+      .deadline-today-suggestion {
+        position: absolute;
+        top: 50%;
+        left: 11px;
+        display: block;
+        transform: translateY(-50%);
+        color: #94aed6;
+        pointer-events: none;
+      }
+
+      .deadline-input-wrap:not(.has-value):not(.is-disabled):not(:focus-within) #deadlineInput {
+        color: transparent;
+      }
+
+      .deadline-input-wrap.has-value .deadline-today-suggestion,
+      .deadline-input-wrap.is-disabled .deadline-today-suggestion,
+      .deadline-input-wrap:focus-within .deadline-today-suggestion {
+        display: none;
+      }
+
       .job-type-tabs {
         flex-wrap: nowrap;
         overflow-x: auto;
@@ -2325,6 +2357,18 @@
         order: -1;
       }
 
+      #jobTypeTabs[data-tracker="finance"] [data-job-type="Graduate Programmes"] .job-type-tab-label,
+      #jobTypeTabs[data-tracker="tech"] [data-job-type="Graduate Programmes"] .job-type-tab-label,
+      #jobTypeTabs[data-tracker="engineering"] [data-job-type="Graduate Programmes"] .job-type-tab-label {
+        display: none;
+      }
+
+      #jobTypeTabs[data-tracker="finance"] [data-job-type="Graduate Programmes"] .job-type-tab-mobile-label,
+      #jobTypeTabs[data-tracker="tech"] [data-job-type="Graduate Programmes"] .job-type-tab-mobile-label,
+      #jobTypeTabs[data-tracker="engineering"] [data-job-type="Graduate Programmes"] .job-type-tab-mobile-label {
+        display: inline;
+      }
+
       #trackerView > .controls,
       #trackerView > .table-wrap {
         position: relative;
@@ -2586,7 +2630,10 @@
           </div>
           <div class="field">
             <label for="deadlineInput">Next Deadline</label>
-            <input id="deadlineInput" type="date">
+            <div class="deadline-input-wrap">
+              <input id="deadlineInput" type="date">
+              <span class="deadline-today-suggestion" id="deadlineTodaySuggestion" aria-hidden="true"></span>
+            </div>
             <label class="deadline-unknown-option" for="deadlineUnknown">
               <input id="deadlineUnknown" type="checkbox">
               <span>Deadline Unknown</span>
@@ -3155,7 +3202,10 @@
       const dateInput = document.querySelector("#deadlineInput");
       dateInput.disabled = event.target.checked;
       if (event.target.checked) dateInput.value = "";
+      updateDeadlineSuggestion();
     });
+    document.querySelector("#deadlineInput").addEventListener("input", updateDeadlineSuggestion);
+    document.querySelector("#deadlineInput").addEventListener("change", updateDeadlineSuggestion);
     document.querySelector("#cvFileInput").addEventListener("change", event => saveDocument("cv", event));
     document.querySelector("#coverFileInput").addEventListener("change", event => saveDocument("cover", event));
     document.querySelector("#addAdditionalDocumentBtn").addEventListener("click", () => {
@@ -3232,7 +3282,16 @@
         button.dataset.jobType = type;
         button.setAttribute("aria-pressed", String(type === activeJobType));
         button.classList.toggle("active", type === activeJobType);
-        button.textContent = type;
+        const fullLabel = document.createElement("span");
+        fullLabel.className = "job-type-tab-label";
+        fullLabel.textContent = type;
+        button.appendChild(fullLabel);
+        if (type === "Graduate Programmes") {
+          const mobileLabel = document.createElement("span");
+          mobileLabel.className = "job-type-tab-mobile-label";
+          mobileLabel.textContent = "Grad Programmes";
+          button.appendChild(mobileLabel);
+        }
         tabs.appendChild(button);
       });
       const jobTypeSelect = document.querySelector("#jobTypeInput");
@@ -3286,6 +3345,19 @@
       const date = new Date();
       date.setDate(date.getDate() + days);
       return date.toISOString().slice(0, 10);
+    }
+
+    function updateDeadlineSuggestion() {
+      const input = document.querySelector("#deadlineInput");
+      const wrapper = input.closest(".deadline-input-wrap");
+      const suggestion = document.querySelector("#deadlineTodaySuggestion");
+      suggestion.textContent = new Intl.DateTimeFormat(navigator.language, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      }).format(new Date());
+      wrapper.classList.toggle("has-value", Boolean(input.value));
+      wrapper.classList.toggle("is-disabled", input.disabled);
     }
 
     function getDefaultStageNames() {
@@ -3797,6 +3869,7 @@
       const deadlineUnknown = document.querySelector("#deadlineUnknown");
       deadlineUnknown.checked = Boolean(editingId && !app.deadline);
       document.querySelector("#deadlineInput").disabled = deadlineUnknown.checked;
+      updateDeadlineSuggestion();
       const categoryValue = app.companyCategory ? normalizeCompanyCategory(app.companyCategory) : "";
       const knownCategory = companyCategories.some(category => category.toLowerCase() === categoryValue.toLowerCase());
       const freeTextCategory = activeTracker === "law";
