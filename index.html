@@ -183,9 +183,15 @@
       outline-offset: 2px;
     }
 
-    .resources-nav-link {
+    .pages-nav-links {
       grid-column: 2;
       justify-self: center;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .resources-nav-link {
       padding: 8px 4px;
       background: transparent;
       color: #e1e8f1;
@@ -202,6 +208,39 @@
     .resources-nav-link:hover .resources-nav-icon,
     .resources-nav-link.active .resources-nav-icon { color: #fff; }
     .resources-nav-link:focus-visible { outline: 3px solid #73d7d8; outline-offset: 2px; border-radius: 4px; }
+
+    .calendar-view { display: none; }
+    .calendar-view.active { display: block; }
+    .calendar-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .calendar-header h1 { margin: 0; }
+    .calendar-controls { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+    .calendar-month-label { min-width: 190px; text-align: center; font-size: 20px; font-weight: 800; color: var(--ink); }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+    .calendar-weekday { padding: 8px 10px; color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+    .calendar-day { min-height: 118px; padding: 9px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .calendar-spacer { min-height: 0; }
+    .calendar-day.today { border-color: #0a66c2; box-shadow: inset 0 0 0 1px #0a66c2; }
+    .calendar-day-number { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 800; }
+    .calendar-day-weekday { display: none; }
+    .calendar-event { display: block; width: 100%; margin-top: 5px; padding: 6px 7px; border-radius: 7px; text-align: left; font-size: 12px; line-height: 1.3; overflow-wrap: anywhere; }
+    .calendar-event.urgency-overdue { background: #8f1d1d; color: #fff; }
+    .calendar-event.urgency-urgent { background: #fde8e7; color: #a5221d; }
+    .calendar-event.urgency-soon { background: #fff1d9; color: #8a4b00; }
+    .calendar-event.urgency-later { background: #e6f4ec; color: #176340; }
+    .calendar-event.urgency-overdue:hover { background: #751616; }
+    .calendar-event.urgency-urgent:hover { background: #fbd7d5; }
+    .calendar-event.urgency-soon:hover { background: #ffe6bd; }
+    .calendar-event.urgency-later:hover { background: #d5ebdf; }
+    .calendar-event strong { display: block; font-size: 12px; }
+    .calendar-event span { display: block; margin-top: 2px; font-size: 11px; opacity: .9; }
+    .calendar-empty-note { margin-top: 14px; color: var(--muted); }
+    .calendar-legend { position: relative; top: -8px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; margin-top: 1px; }
+    .calendar-legend-item { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .calendar-legend-swatch { width: 13px; height: 13px; flex: 0 0 13px; border-radius: 4px; }
+    .calendar-legend-swatch.urgency-overdue { background: #8f1d1d; }
+    .calendar-legend-swatch.urgency-urgent { background: #fde8e7; border: 1px solid #a5221d; }
+    .calendar-legend-swatch.urgency-soon { background: #fff1d9; border: 1px solid #8a4b00; }
+    .calendar-legend-swatch.urgency-later { background: #e6f4ec; border: 1px solid #176340; }
 
     .resource-grid {
       display: grid;
@@ -1566,7 +1605,7 @@
 
     @media (max-width: 1300px) {
       .tracker-switcher { grid-template-columns: 1fr; }
-      .resources-nav-link { grid-column: 1; justify-self: start; transform: none; }
+      .pages-nav-links { grid-column: 1; justify-self: start; transform: none; }
       .tracker-switcher-actions {
         grid-column: 1;
         width: 100%;
@@ -1794,7 +1833,7 @@
       }
 
       .tracker-brand-name {
-        font-size: 19px;
+        font-size: 20px;
       }
 
       .tracker-brand-tagline {
@@ -2171,6 +2210,33 @@
     }
 
     @media (max-width: 680px) {
+      .tracker-switcher {
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 8px;
+        row-gap: 16px;
+      }
+
+      .tracker-brand { grid-column: 1; align-self: start; }
+      .tracker-brand-tagline { display: none; }
+
+      .pages-nav-links {
+        grid-column: 2;
+        grid-row: 1;
+        position: static;
+        justify-self: end;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0;
+      }
+
+      .pages-nav-links .resources-nav-link {
+        padding: 3px 0;
+        font-size: 12px;
+        line-height: 1.2;
+      }
+
+      .pages-nav-links .resources-nav-icon { width: 14px; height: 14px; margin-right: 4px; }
+
       .shell {
         width: min(100% - 20px, 1600px);
         padding-top: 15px;
@@ -2242,6 +2308,7 @@
       .tracker-switcher-actions {
         position: relative;
         top: -4px;
+        grid-column: 1 / -1;
         justify-content: flex-start;
         gap: 8px;
       }
@@ -2260,10 +2327,22 @@
         scrollbar-width: none;
       }
 
-      .resources-nav-link {
-        position: relative;
-        top: -3px;
-      }
+      .calendar-header { align-items: flex-start; flex-direction: column; }
+      .calendar-controls { display: flex; width: 100%; gap: 4px; }
+      #calendarPrevBtn, #calendarNextBtn { width: 34px; min-width: 34px; min-height: 34px; }
+      #backToTrackerFromCalendarBtn { width: auto; min-width: 0; min-height: 34px; margin-left: auto; padding: 0 8px; font-size: 12px; }
+      .calendar-month-label { width: 148px; min-width: 148px; flex: 0 0 148px; font-size: 15px; white-space: nowrap; }
+      .calendar-legend { display: grid; grid-template-columns: max-content max-content; justify-content: start; gap: 8px 24px; margin-top: 1px; }
+      .calendar-legend-item { gap: 5px; font-size: 10px; }
+      .calendar-legend-swatch { width: 11px; height: 11px; flex-basis: 11px; }
+      .calendar-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+      .calendar-weekday,
+      .calendar-spacer { display: none; }
+      .calendar-day { min-height: 78px; padding: 4px; border-radius: 8px; }
+      .calendar-day-number { display: inline; margin: 0; font-size: 11px; }
+      .calendar-day-weekday { display: inline; margin-left: 4px; color: var(--muted); font-size: 10px; font-weight: 700; }
+      .calendar-event { margin-top: 3px; padding: 3px; font-size: 10px; }
+      .calendar-event span { display: block; margin-top: 1px; font-size: 9px; line-height: 1.15; }
 
       .tracker-switcher-options::-webkit-scrollbar { display: none; }
 
@@ -2397,7 +2476,10 @@
         <span class="tracker-brand-tagline">Organise your applications. Track your progress.</span>
       </span>
     </div>
-    <button class="resources-nav-link" id="resourcesNavBtn" type="button" aria-pressed="false"><span class="resources-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 6.2c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5m0-13c2-1.5 5-2 8-1.5v13c-3-.5-6 0-8 1.5m0-13v13"/></svg></span>Useful Resources</button>
+    <div class="pages-nav-links" aria-label="More tracker pages">
+      <button class="resources-nav-link" id="resourcesNavBtn" type="button" aria-pressed="false"><span class="resources-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 6.2c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5m0-13c2-1.5 5-2 8-1.5v13c-3-.5-6 0-8 1.5m0-13v13"/></svg></span>Useful Resources</button>
+      <button class="resources-nav-link" id="calendarNavBtn" type="button" aria-pressed="false"><span class="resources-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></span>Deadline Calendar</button>
+    </div>
     <div class="tracker-switcher-actions">
       <div class="tracker-switcher-nav">
         <span class="tracker-switcher-label">Choose a tracker</span>
@@ -2600,6 +2682,26 @@
     <p class="resources-note">These resources are provided by their respective creators. Any paid or affiliate partnerships will be clearly marked with an asterisk (*).</p>
   </section>
 
+  <section class="shell view calendar-view" id="calendarView" aria-labelledby="calendarTitle">
+    <header class="calendar-header">
+      <div><h1 id="calendarTitle">Deadline Calendar</h1></div>
+      <div class="calendar-controls">
+        <button class="btn secondary" id="calendarPrevBtn" type="button" aria-label="Previous month">‹</button>
+        <strong class="calendar-month-label" id="calendarMonthLabel"></strong>
+        <button class="btn secondary" id="calendarNextBtn" type="button" aria-label="Next month">›</button>
+        <button class="btn secondary" id="backToTrackerFromCalendarBtn" type="button">Back to tracker</button>
+      </div>
+    </header>
+    <div class="calendar-legend" role="group" aria-label="Deadline colour key">
+      <span class="calendar-legend-item"><span class="calendar-legend-swatch urgency-overdue" aria-hidden="true"></span>Overdue</span>
+      <span class="calendar-legend-item"><span class="calendar-legend-swatch urgency-urgent" aria-hidden="true"></span>Due in 0–3 days</span>
+      <span class="calendar-legend-item"><span class="calendar-legend-swatch urgency-soon" aria-hidden="true"></span>Due in 4–7 days</span>
+      <span class="calendar-legend-item"><span class="calendar-legend-swatch urgency-later" aria-hidden="true"></span>Due in 8+ days</span>
+    </div>
+    <div class="calendar-grid" id="deadlineCalendarGrid" role="grid" aria-label="Application deadlines"></div>
+    <p class="calendar-empty-note" id="calendarEmptyNote" hidden>No applications with known deadlines in this month.</p>
+  </section>
+
   <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="dialog">
       <div class="dialog-head">
@@ -2636,7 +2738,7 @@
             </div>
             <label class="deadline-unknown-option" for="deadlineUnknown">
               <input id="deadlineUnknown" type="checkbox">
-              <span>Deadline Unknown</span>
+              <span>Deadline Unknown / No Deadline</span>
             </label>
           </div>
           <div class="field">
@@ -3074,6 +3176,7 @@
     let detailId = null;
     let pendingAdditionalDocumentIndex = null;
     let activeView = "tracker";
+    let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     let activeJobType = loadSelectedJobType(activeTracker);
     let collapsedCategories = loadCollapsedCategories();
     let modalScrollTop = 0;
@@ -3090,6 +3193,19 @@
     updateTrackerSwitcher();
     document.querySelector("#resourcesNavBtn").addEventListener("click", () => showView("resources"));
     document.querySelector("#backToTrackerFromResourcesBtn").addEventListener("click", () => showView("tracker"));
+    document.querySelector("#calendarNavBtn").addEventListener("click", () => {
+      if (activeView === "calendar") showView("tracker");
+      else showView("calendar");
+    });
+    document.querySelector("#backToTrackerFromCalendarBtn").addEventListener("click", () => showView("tracker"));
+    document.querySelector("#calendarPrevBtn").addEventListener("click", () => {
+      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
+      renderCalendar();
+    });
+    document.querySelector("#calendarNextBtn").addEventListener("click", () => {
+      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
+      renderCalendar();
+    });
     document.querySelector("#trackerSwitcher").addEventListener("click", event => {
       const option = event.target.closest("[data-tracker]");
       if (!option) return;
@@ -4129,9 +4245,87 @@
         document.querySelector("#resourcesView").classList.add("active");
         window.scrollTo(0, 0);
       }
+      if (view === "calendar") {
+        document.querySelector("#calendarView").classList.add("active");
+        renderCalendar();
+        window.scrollTo(0, 0);
+      }
       const resourcesButton = document.querySelector("#resourcesNavBtn");
       resourcesButton.classList.toggle("active", view === "resources");
       resourcesButton.setAttribute("aria-pressed", String(view === "resources"));
+      const calendarButton = document.querySelector("#calendarNavBtn");
+      calendarButton.classList.toggle("active", view === "calendar");
+      calendarButton.setAttribute("aria-pressed", String(view === "calendar"));
+    }
+
+    function renderCalendar() {
+      const grid = document.querySelector("#deadlineCalendarGrid");
+      const emptyNote = document.querySelector("#calendarEmptyNote");
+      const year = calendarMonth.getFullYear();
+      const month = calendarMonth.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const startOffset = (firstDay.getDay() + 6) % 7;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const todayKey = localDateKey(new Date());
+      const monthLabel = new Intl.DateTimeFormat(navigator.language, { month: "long", year: "numeric" }).format(calendarMonth);
+      document.querySelector("#calendarMonthLabel").textContent = monthLabel;
+      grid.replaceChildren();
+
+      ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(day => {
+        const heading = document.createElement("div");
+        heading.className = "calendar-weekday";
+        heading.setAttribute("role", "columnheader");
+        heading.textContent = day;
+        grid.appendChild(heading);
+      });
+
+      const eligibleApplications = applications.filter(isCalendarDeadlineVisible);
+      const monthEvents = eligibleApplications.filter(app => app.deadline && app.deadline.slice(0, 7) === `${year}-${String(month + 1).padStart(2, "0")}`);
+      for (let index = 0; index < startOffset + daysInMonth; index++) {
+        if (index < startOffset) {
+          const spacer = document.createElement("div");
+          spacer.className = "calendar-spacer";
+          spacer.setAttribute("aria-hidden", "true");
+          grid.appendChild(spacer);
+          continue;
+        }
+        const dayDate = new Date(year, month, index - startOffset + 1);
+        const dateKey = localDateKey(dayDate);
+        const dayCell = document.createElement("div");
+        dayCell.className = `calendar-day${dateKey === todayKey ? " today" : ""}`;
+        dayCell.setAttribute("role", "gridcell");
+        const number = document.createElement("span");
+        number.className = "calendar-day-number";
+        number.textContent = String(dayDate.getDate());
+        dayCell.appendChild(number);
+        const weekday = document.createElement("span");
+        weekday.className = "calendar-day-weekday";
+        weekday.textContent = new Intl.DateTimeFormat(navigator.language, { weekday: "short" }).format(dayDate);
+        dayCell.appendChild(weekday);
+        eligibleApplications.filter(app => app.deadline === dateKey).forEach(app => {
+          const event = document.createElement("button");
+          const daysRemaining = daysUntil(app.deadline);
+          const urgencyClass = daysRemaining < 0 ? "urgency-overdue"
+            : daysRemaining <= 3 ? "urgency-urgent"
+              : daysRemaining <= 7 ? "urgency-soon" : "urgency-later";
+          event.className = `calendar-event ${urgencyClass}`;
+          event.type = "button";
+          event.innerHTML = `<strong>${escapeHtml(app.company)}</strong><span>${escapeHtml(getNextAction(app))}</span>`;
+          event.title = `${app.company} — next stage: ${getNextAction(app)}`;
+          event.addEventListener("click", () => openDetail(app.id));
+          dayCell.appendChild(event);
+        });
+        grid.appendChild(dayCell);
+      }
+      emptyNote.hidden = monthEvents.length > 0;
+    }
+
+    function localDateKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function isCalendarDeadlineVisible(app) {
+      return app.status !== "Rejected" && app.stages.some(stage => stage.status === "todo");
     }
 
     function openDetail(id) {
