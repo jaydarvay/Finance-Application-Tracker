@@ -580,6 +580,14 @@
       box-shadow: 0 12px 30px rgba(22, 36, 58, 0.18);
     }
 
+    @media (max-width: 680px) {
+      .total-metric .metric-breakdown {
+        right: auto;
+        left: 0;
+        width: min(260px, calc(100vw - 40px));
+      }
+    }
+
     .metric-breakdown[hidden] { display: none; }
 
     .metric-breakdown-row {
