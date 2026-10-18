@@ -339,6 +339,11 @@
     .resources-header > div { min-width: 0; }
     .resources-header .btn { flex: 0 0 auto; }
 
+    .tracker-title-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .tracker-title-rename { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; min-height: 36px; padding: 6px 12px; font-size: 14px; }
+    .tracker-title-rename[hidden] { display: none; }
+    .tracker-title-rename span { font-size: 17px; line-height: 1; }
+
     h1 {
       margin: 0;
       font-size: clamp(28px, 4vw, 46px);
@@ -2973,6 +2978,28 @@
       }
     }
 
+    @media (max-width: 900px) {
+      #trackerView > header .tracker-title-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      #trackerView > header .tracker-title-wrap h1 {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+      }
+
+      #trackerView > header .tracker-title-rename {
+        width: auto;
+        max-width: 100%;
+        white-space: nowrap;
+      }
+    }
+
     @media (max-width: 1300px) {
       .tracker-switcher { grid-template-columns: minmax(0, 1fr) auto; }
       .tracker-switcher-actions {
@@ -3027,7 +3054,7 @@
           <button class="tracker-option active" type="button" data-tracker="finance" aria-pressed="true">Finance</button>
           <button class="tracker-option" type="button" data-tracker="tech" aria-pressed="false">Tech</button>
           <button class="tracker-option" type="button" data-tracker="engineering" aria-pressed="false">Engineering</button>
-          <button class="tracker-option" type="button" data-tracker="law" aria-pressed="false">Law</button>
+          <button class="tracker-option" type="button" data-tracker="law" aria-pressed="false">Other</button>
         </div>
       </div>
       <a class="linkedin-link tracker-linkedin-link" href="https://www.linkedin.com/in/jaydarvay/" target="_blank" rel="noopener noreferrer" aria-label="Visit Jay Darvay on LinkedIn" title="LinkedIn">
@@ -3040,8 +3067,9 @@
   </nav>
   <main class="shell view active" id="trackerView">
     <header>
-      <div>
+      <div class="tracker-title-wrap">
         <h1 id="trackerTitle">Finance Tracker</h1>
+        <button class="btn secondary tracker-title-rename" id="renameOtherTrackerBtn" type="button" hidden><span aria-hidden="true">✎</span> Edit name</button>
       </div>
       <div class="toolbar-wrap">
         <div class="toolbar" aria-label="Application tools">
@@ -3386,7 +3414,12 @@
       engineering: `${baseStorageKey}-engineering`,
       law: `${baseStorageKey}-law`
     };
-    const trackerNames = { finance: "Finance", tech: "Tech", engineering: "Engineering", law: "Law" };
+    const trackerNames = { finance: "Finance", tech: "Tech", engineering: "Engineering", law: "Other" };
+    const otherTrackerNameStorageKey = `${baseStorageKey}-other-tracker-name`;
+    function trackerDisplayName(tracker) {
+      if (tracker !== "law") return trackerNames[tracker];
+      try { return localStorage.getItem(otherTrackerNameStorageKey)?.trim() || "Other"; } catch { return "Other"; }
+    }
     const trackerCategoryOptions = {
       finance: ["Bulge Bracket", "Elite Boutique", "Middle Market", "Buy-Side", "Asset Management", "Big 4", "Consulting", "Trading and Quant", "Real Estate", "Pensions and Insurance", "Accounting and Audit", "Miscellaneous"],
       tech: ["Software Engineering", "Data Science", "AI and Machine Learning", "DevOps and Infrastructure", "Quant Developer", "Tech Consulting", "Cyber Security", "Startups", "IT", "Miscellaneous"],
@@ -3824,6 +3857,21 @@
       calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
       renderCalendar();
     });
+    document.querySelector("#renameOtherTrackerBtn").addEventListener("click", () => {
+      const currentName = trackerDisplayName("law");
+      const enteredName = window.prompt("Name your Other tracker:", currentName);
+      if (enteredName === null) return;
+      const nextName = enteredName.trim();
+      if (!nextName) {
+        alert("Please enter a name for this tracker.");
+        return;
+      }
+      if (!saveToBrowserStorage(otherTrackerNameStorageKey, nextName)) return;
+      updateTrackerSwitcher();
+      document.querySelector("#trackerTitle").textContent = `${nextName} Tracker`;
+      document.querySelector("#renameOtherTrackerBtn").setAttribute("aria-label", `Edit the ${nextName} Tracker name`);
+      document.title = `NextStep Tracker | ${nextName}`;
+    });
     document.querySelector("#trackerSwitcher").addEventListener("click", event => {
       const option = event.target.closest("[data-tracker]");
       if (!option) return;
@@ -4205,8 +4253,11 @@
       customOption.textContent = "Add a company category";
       select.appendChild(customOption);
       updateCustomCategoryVisibility();
-      document.querySelector("#trackerTitle").textContent = `${trackerNames[activeTracker]} Tracker`;
-      document.title = `NextStep Tracker | ${trackerNames[activeTracker]}`;
+      const trackerName = trackerDisplayName(activeTracker);
+      document.querySelector("#trackerTitle").textContent = `${trackerName} Tracker`;
+      document.querySelector("#renameOtherTrackerBtn").hidden = activeTracker !== "law";
+      document.querySelector("#renameOtherTrackerBtn").setAttribute("aria-label", `Edit the ${trackerName} Tracker name`);
+      document.title = `NextStep Tracker | ${trackerName}`;
       updateJobTypeControls();
     }
 
