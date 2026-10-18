@@ -2706,6 +2706,32 @@
       font-size: clamp(10px, .95vw, 13px);
     }
 
+    .job-type-control { position: relative; display: inline-flex; min-width: 0; flex: 0 1 auto; }
+    .job-type-control.in-menu { width: 100%; flex: 0 0 auto; }
+    .job-type-delete {
+      position: absolute;
+      top: -5px;
+      right: -4px;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border: 1px solid #d9e2ef;
+      border-radius: 50%;
+      background: #fff;
+      color: #9e3030;
+      font: 800 14px/1 system-ui, sans-serif;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .12s ease;
+    }
+    .job-type-control:hover .job-type-delete,
+    .job-type-control:focus-within .job-type-delete { opacity: 1; pointer-events: auto; }
+    .job-type-delete:focus-visible { outline: 3px solid rgba(23, 105, 170, .35); outline-offset: 2px; }
+
     .job-type-more { position: relative; flex: 0 0 auto; }
     .job-type-more-summary {
       list-style: none;
@@ -2766,6 +2792,10 @@
     }
     .job-type-more-item:hover { border-color: #bdd8de; background: #dfedf0; }
     .job-type-more-item.active { border-color: #1769aa; background: #1769aa; color: #fff; }
+    .job-type-add-form { display: grid; gap: 6px; min-width: 190px; padding: 4px; }
+    .job-type-add-form input { width: 100%; min-width: 0; padding: 8px 10px; border: 1px solid #d9e2ef; border-radius: 8px; font: inherit; }
+    .job-type-add-form button { min-height: 36px; padding: 7px 12px; border: 1px solid #d9e9ed; border-radius: 999px; background: #eaf3f5; color: #246572; cursor: pointer; font: inherit; font-weight: 750; white-space: nowrap; }
+    .job-type-add-form button:hover { border-color: #bdd8de; background: #dfedf0; }
     .job-type-more-item:focus-visible,
     .job-type-more-summary:focus-visible { outline: 3px solid rgba(23, 105, 170, .35); outline-offset: 2px; }
 
@@ -3371,13 +3401,51 @@
     };
     const trackerSelectionKey = `${baseStorageKey}-selected-tracker`;
     const selectedJobTypeStorageKey = tracker => `${trackerStorageKeys[tracker]}-selected-job-type`;
+    const customLawJobTypesStorageKey = `${trackerStorageKeys.law}-custom-job-types`;
+    const deletedLawJobTypesStorageKey = `${trackerStorageKeys.law}-deleted-job-types`;
     const filterPreferencesKey = tracker => `${trackerStorageKeys[tracker]}-filter-preferences`;
+    function loadDeletedLawJobTypes() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(deletedLawJobTypesStorageKey) || "[]");
+        return Array.isArray(saved) ? [...new Set(saved.filter(value => typeof value === "string").map(value => value.trim()).filter(Boolean))] : [];
+      } catch { return []; }
+    }
+    function loadCustomLawJobTypes() {
+      const unique = [];
+      const deleted = loadDeletedLawJobTypes();
+      const addUnique = value => {
+        const label = typeof value === "string" ? value.trim() : "";
+        if (label && label.toLowerCase() !== "placements" && !deleted.some(item => item.toLowerCase() === label.toLowerCase()) && !unique.some(item => item.toLowerCase() === label.toLowerCase())) unique.push(label);
+      };
+      try {
+        const saved = JSON.parse(localStorage.getItem(customLawJobTypesStorageKey) || "[]");
+        if (Array.isArray(saved)) saved.forEach(addUnique);
+      } catch {}
+      const savedTypeCount = unique.length;
+      try {
+        const savedApplications = JSON.parse(localStorage.getItem(trackerStorageKeys.law) || "[]");
+        if (Array.isArray(savedApplications)) savedApplications.forEach(app => addUnique(app?.jobType));
+      } catch {}
+      if (unique.length > savedTypeCount) {
+        try {
+          localStorage.setItem(customLawJobTypesStorageKey, JSON.stringify(unique));
+        } catch {}
+      }
+      return unique;
+    }
+    function jobTypeOptionsForView(tracker) {
+      if (tracker === "law" && window.matchMedia("(min-width: 681px)").matches) {
+        const deleted = loadDeletedLawJobTypes();
+        return ["Placements", ...loadCustomLawJobTypes()].filter(type => !deleted.some(item => item.toLowerCase() === type.toLowerCase()));
+      }
+      return trackerJobTypeOptions[tracker] || [];
+    }
     function defaultJobTypeForTracker(tracker) {
-      const options = trackerJobTypeOptions[tracker] || [];
+      const options = jobTypeOptionsForView(tracker);
       return options.includes("Graduate Programmes") ? "Graduate Programmes" : options[0];
     }
     function loadSelectedJobType(tracker) {
-      const options = trackerJobTypeOptions[tracker] || [];
+      const options = jobTypeOptionsForView(tracker);
       try {
         const saved = localStorage.getItem(selectedJobTypeStorageKey(tracker));
         return options.includes(saved) ? saved : defaultJobTypeForTracker(tracker);
@@ -3442,7 +3510,7 @@
     const stageStates = ["todo", "done"];
     const stageLabels = { todo: "To do", done: "Done" };
     const applicationStatuses = ["In progress", "Offer", "Rejected"];
-    let jobTypes = trackerJobTypeOptions[activeTracker];
+    let jobTypes = jobTypeOptionsForView(activeTracker);
     function loadCompanyCategories(tracker) {
       const defaults = trackerCategoryOptions[tracker] || [];
       const savedKey = `${trackerStorageKeys[tracker]}-custom-company-categories`;
@@ -3473,9 +3541,9 @@
     const sampleData = [
   {
     "id": "9a4bb421-9cd6-48b0-bff9-f3d5790ba10c",
-    "company": "Goldman Stanley",
+    "company": "Example Firm",
     "role": "M&A Analyst",
-    "deadline": "2026-10-20",
+    "deadline": "2026-10-23",
     "priority": "Medium",
     "status": "In progress",
     "appliedAt": "2026-10-01",
@@ -3561,7 +3629,7 @@
     "id": "00b20af7-88c2-4e3d-b69c-06d00d944dda",
     "company": "Example Capital Partners",
     "role": "Private Equity Analyst",
-    "deadline": "2026-10-17",
+    "deadline": "2026-10-20",
     "priority": "High",
     "status": "In progress",
     "appliedAt": "2026-09-29",
@@ -3608,7 +3676,7 @@
     "id": "581d1e24-e758-4031-bf79-25b7f014478c",
     "company": "Example Asset Management",
     "role": "Investment Analyst",
-    "deadline": "2026-10-23",
+    "deadline": "2026-10-26",
     "priority": "Low",
     "status": "In progress",
     "appliedAt": "2026-09-22",
@@ -3653,7 +3721,7 @@
     "id": "b0fa60ea-f881-4cf2-beba-9bcc3a060a44",
     "company": "Example Real Estate",
     "role": "Real Estate Graduate",
-    "deadline": "2026-10-21",
+    "deadline": "2026-10-24",
     "priority": "Medium",
     "status": "Rejected",
     "appliedAt": "2026-10-02",
@@ -3698,9 +3766,7 @@
 ];
 
     let applications = loadApplications();
-    if (activeTracker !== "law") {
-      applications.forEach(app => addCompanyCategory(app.companyCategory));
-    }
+    applications.forEach(app => addCompanyCategory(app.companyCategory));
     let editingId = null;
     let detailId = null;
     let pendingAdditionalDocumentIndex = null;
@@ -3769,7 +3835,7 @@
       collapsedCategoriesStorageKey = `${storageKey}-collapsed-company-categories`;
       applications = loadApplications();
       migrateLegacyDocuments();
-      if (activeTracker !== "law") applications.forEach(app => addCompanyCategory(app.companyCategory));
+      applications.forEach(app => addCompanyCategory(app.companyCategory));
       collapsedCategories = loadCollapsedCategories();
       editingId = null;
       detailId = null;
@@ -3848,12 +3914,70 @@
       saveFilterPreferences();
       render();
     });
-    document.querySelector("#jobTypeTabs").addEventListener("click", event => {
+    document.querySelector("#jobTypeTabs").addEventListener("click", async event => {
+      const deleteButton = event.target.closest("[data-delete-job-type]");
+      if (deleteButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (activeTracker !== "law" || !window.matchMedia("(min-width: 681px)").matches) return;
+        const type = deleteButton.dataset.deleteJobType;
+        const remaining = jobTypes.filter(item => item.toLowerCase() !== type.toLowerCase());
+        if (!remaining.length) return;
+        const destination = remaining.includes("Placements") ? "Placements" : remaining[0];
+        const affected = applications.filter(app => String(app.jobType || "").toLowerCase() === type.toLowerCase()).length;
+        const prompt = affected
+          ? `Delete “${type}”? ${affected} existing ${affected === 1 ? "application will" : "applications will"} be moved to “${destination}”.`
+          : `Delete “${type}” from your Law job types?`;
+        if (!await confirmAction(prompt)) return;
+        const previousApplications = applications;
+        if (affected) {
+          applications = applications.map(app => String(app.jobType || "").toLowerCase() === type.toLowerCase() ? { ...app, jobType: destination } : app);
+          if (!persist()) { applications = previousApplications; return; }
+        }
+        const deletedTypes = loadDeletedLawJobTypes();
+        if (!deletedTypes.some(item => item.toLowerCase() === type.toLowerCase())) deletedTypes.push(type);
+        const customTypes = loadCustomLawJobTypes().filter(item => item.toLowerCase() !== type.toLowerCase());
+        if (!saveToBrowserStorage(deletedLawJobTypesStorageKey, JSON.stringify(deletedTypes))) return;
+        if (!saveToBrowserStorage(customLawJobTypesStorageKey, JSON.stringify(customTypes))) return;
+        if (activeJobType.toLowerCase() === type.toLowerCase()) activeJobType = destination;
+        saveToBrowserStorage(selectedJobTypeStorageKey("law"), activeJobType);
+        updateJobTypeControls();
+        render();
+        return;
+      }
       const tab = event.target.closest("[data-job-type]");
       if (!tab) return;
       activeJobType = tab.dataset.jobType;
       saveToBrowserStorage(selectedJobTypeStorageKey(activeTracker), activeJobType);
       tab.closest(".job-type-more")?.removeAttribute("open");
+      render();
+    });
+    document.querySelector("#jobTypeTabs").addEventListener("submit", event => {
+      const form = event.target.closest(".job-type-add-form");
+      if (!form) return;
+      event.preventDefault();
+      if (activeTracker !== "law" || !window.matchMedia("(min-width: 681px)").matches) return;
+      const label = form.querySelector("[name='jobTypeName']").value.trim();
+      if (!label) return;
+      const existing = jobTypes.find(type => type.toLowerCase() === label.toLowerCase());
+      if (!existing) {
+        const deletedTypes = loadDeletedLawJobTypes();
+        const remainingDeletedTypes = deletedTypes.filter(type => type.toLowerCase() !== label.toLowerCase());
+        if (remainingDeletedTypes.length !== deletedTypes.length && !saveToBrowserStorage(deletedLawJobTypesStorageKey, JSON.stringify(remainingDeletedTypes))) return;
+        const savedTypes = loadCustomLawJobTypes();
+        savedTypes.push(label);
+        if (!saveToBrowserStorage(customLawJobTypesStorageKey, JSON.stringify(savedTypes))) {
+          if (remainingDeletedTypes.length !== deletedTypes.length) saveToBrowserStorage(deletedLawJobTypesStorageKey, JSON.stringify(deletedTypes));
+          return;
+        }
+      }
+      activeJobType = existing || label;
+      saveToBrowserStorage(selectedJobTypeStorageKey(activeTracker), activeJobType);
+      updateJobTypeControls();
+      render();
+    });
+    window.matchMedia("(min-width: 681px)").addEventListener("change", () => {
+      updateJobTypeControls();
       render();
     });
     window.matchMedia("(min-width: 1301px)").addEventListener("change", () => {
@@ -3912,20 +4036,18 @@
     function updateCustomCategoryVisibility() {
       const categorySelect = document.querySelector("#categoryInput");
       const categoryTextInput = document.querySelector("#categoryTextInput");
-      const freeTextMode = activeTracker === "law";
       const customMode = categorySelect.value === "__custom__";
-      const showTextInput = freeTextMode || customMode;
-      categorySelect.style.display = freeTextMode ? "none" : "";
-      categorySelect.required = !freeTextMode;
-      categoryTextInput.style.display = showTextInput ? "" : "none";
-      categoryTextInput.required = showTextInput;
-      document.querySelector('label[for="categoryInput"], label[for="categoryTextInput"]').htmlFor = showTextInput ? "categoryTextInput" : "categoryInput";
-      if (!showTextInput) categoryTextInput.value = "";
+      categorySelect.style.display = "";
+      categorySelect.required = true;
+      categoryTextInput.style.display = customMode ? "" : "none";
+      categoryTextInput.required = customMode;
+      document.querySelector('label[for="categoryInput"], label[for="categoryTextInput"]').htmlFor = customMode ? "categoryTextInput" : "categoryInput";
+      if (!customMode) categoryTextInput.value = "";
     }
 
     function addCompanyCategory(category) {
       const label = typeof category === "string" ? category.trim() : "";
-      if (!label || activeTracker === "law") return label;
+      if (!label) return label;
       const existing = companyCategories.find(item => item.toLowerCase() === label.toLowerCase());
       const savedLabel = existing || label;
       if (!existing) {
@@ -3948,22 +4070,24 @@
     }
 
     function updateJobTypeControls() {
-      jobTypes = trackerJobTypeOptions[activeTracker];
+      const desktopLayout = window.matchMedia("(min-width: 1301px)").matches;
+      const lawJobTypeLayout = activeTracker === "law" && window.matchMedia("(min-width: 681px)").matches;
+      jobTypes = jobTypeOptionsForView(activeTracker);
       if (!jobTypes.includes(activeJobType)) activeJobType = jobTypes.includes("Graduate Programmes") ? "Graduate Programmes" : jobTypes[0];
       const tabs = document.querySelector("#jobTypeTabs");
       tabs.dataset.tracker = activeTracker;
       tabs.innerHTML = "";
-      const desktopLayout = window.matchMedia("(min-width: 1301px)").matches;
       const desktopOrder = ["Graduate Programmes", "Summer Internships", "Industrial Placements", "Spring Weeks", "Off-Cycle Internships", "Pre-Uni", "Events"];
-      const primaryOrder = desktopLayout
-        ? [...desktopOrder.filter(type => jobTypes.includes(type)), ...jobTypes.filter(type => !desktopOrder.includes(type))]
-        : activeTracker === "law"
-          ? jobTypes.slice(0, 3)
-          : ["Graduate Programmes", "Summer Internships", "Industrial Placements"].filter(type => jobTypes.includes(type));
+      const primaryOrder = lawJobTypeLayout
+        ? jobTypes.slice(0, 4)
+        : desktopLayout
+          ? [...desktopOrder.filter(type => jobTypes.includes(type)), ...jobTypes.filter(type => !desktopOrder.includes(type))]
+          : activeTracker === "law"
+            ? jobTypes.slice(0, 3)
+            : ["Graduate Programmes", "Summer Internships", "Industrial Placements"].filter(type => jobTypes.includes(type));
       const primaryTypes = primaryOrder.length ? primaryOrder : jobTypes.slice(0, 3);
-      const moreTypes = desktopLayout ? [] : jobTypes.filter(type => !primaryTypes.includes(type));
+      const moreTypes = lawJobTypeLayout ? jobTypes.slice(4) : desktopLayout ? [] : jobTypes.filter(type => !primaryTypes.includes(type));
       const displayJobType = type => type === "Industrial Placements" ? "Placements" : type === "Graduate Programmes" ? (desktopLayout ? "Graduate Schemes" : "Grad Schemes") : type;
-
       const makeJobTypeButton = (type, className) => {
         const button = document.createElement("button");
         button.className = className;
@@ -3981,13 +4105,38 @@
           mobileLabel.textContent = "Grad Schemes";
           button.appendChild(mobileLabel);
         }
-        return button;
+        if (!lawJobTypeLayout || jobTypes.length <= 1) return button;
+        const wrapper = document.createElement("span");
+        wrapper.className = `job-type-control${className === "job-type-more-item" ? " in-menu" : ""}`;
+        wrapper.appendChild(button);
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "job-type-delete";
+        remove.dataset.deleteJobType = type;
+        remove.setAttribute("aria-label", `Delete ${displayJobType(type)}`);
+        remove.title = `Delete ${displayJobType(type)}`;
+        remove.textContent = "×";
+        wrapper.appendChild(remove);
+        return wrapper;
       };
-
-      primaryTypes.forEach(type => tabs.appendChild(makeJobTypeButton(type, "job-type-tab")));
-      if (moreTypes.length) {
+      const makeAddJobTypeForm = () => {
+        const form = document.createElement("form");
+        form.className = "job-type-add-form";
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = "jobTypeName";
+        input.placeholder = "Enter a job type";
+        input.setAttribute("aria-label", "New law job type");
+        input.required = true;
+        const submit = document.createElement("button");
+        submit.type = "submit";
+        submit.textContent = "Add Job Type";
+        form.append(input, submit);
+        return form;
+      };
+      const makeMoreMenu = (types, includeAdder) => {
         const more = document.createElement("details");
-        more.className = `job-type-more${moreTypes.includes(activeJobType) ? " has-active" : ""}`;
+        more.className = `job-type-more${types.includes(activeJobType) ? " has-active" : ""}`;
         const summary = document.createElement("summary");
         summary.className = "job-type-more-summary";
         summary.textContent = "More";
@@ -3995,11 +4144,31 @@
         more.appendChild(summary);
         const menu = document.createElement("div");
         menu.className = "job-type-more-menu";
-        moreTypes.forEach(type => menu.appendChild(makeJobTypeButton(type, "job-type-more-item")));
+        types.forEach(type => menu.appendChild(makeJobTypeButton(type, "job-type-more-item")));
+        if (includeAdder) menu.appendChild(makeAddJobTypeForm());
         more.appendChild(menu);
         tabs.appendChild(more);
+      };
+      primaryTypes.forEach(type => tabs.appendChild(makeJobTypeButton(type, "job-type-tab")));
+      if (lawJobTypeLayout) {
+        if (jobTypes.length < 4) {
+          const addDetails = document.createElement("details");
+          addDetails.className = "job-type-more job-type-add";
+          const summary = document.createElement("summary");
+          summary.className = "job-type-more-summary";
+          summary.textContent = "Add Job Type";
+          summary.setAttribute("aria-label", "Add a law job type");
+          const menu = document.createElement("div");
+          menu.className = "job-type-more-menu";
+          menu.appendChild(makeAddJobTypeForm());
+          addDetails.append(summary, menu);
+          tabs.appendChild(addDetails);
+        } else {
+          makeMoreMenu(moreTypes, true);
+        }
+      } else if (moreTypes.length) {
+        makeMoreMenu(moreTypes, false);
       }
-
       const jobTypeSelect = document.querySelector("#jobTypeInput");
       const selectedJobType = jobTypeSelect.value;
       jobTypeSelect.style.display = "";
@@ -4017,12 +4186,8 @@
 
     function updateCategoryInputForTracker() {
       const select = document.querySelector("#categoryInput");
-      const textInput = document.querySelector("#categoryTextInput");
-      const freeTextMode = activeTracker === "law";
-      select.style.display = freeTextMode ? "none" : "";
-      select.required = !freeTextMode;
-      textInput.style.display = freeTextMode ? "" : "none";
-      textInput.required = freeTextMode;
+      select.style.display = "";
+      select.required = true;
       select.innerHTML = "";
       const placeholder = document.createElement("option");
       placeholder.value = "";
@@ -4035,12 +4200,10 @@
         option.textContent = category;
         select.appendChild(option);
       });
-      if (!freeTextMode) {
-        const customOption = document.createElement("option");
-        customOption.value = "__custom__";
-        customOption.textContent = "Add a company category";
-        select.appendChild(customOption);
-      }
+      const customOption = document.createElement("option");
+      customOption.value = "__custom__";
+      customOption.textContent = "Add a company category";
+      select.appendChild(customOption);
       updateCustomCategoryVisibility();
       document.querySelector("#trackerTitle").textContent = `${trackerNames[activeTracker]} Tracker`;
       document.title = `NextStep Tracker | ${trackerNames[activeTracker]}`;
@@ -4230,6 +4393,7 @@
 
     function normalizeApplication(app) {
       const deadline = app.deadline || "";
+      const savedCustomLawJobTypes = activeTracker === "law" ? loadCustomLawJobTypes() : [];
       return {
         id: app.id || crypto.randomUUID(),
         company: app.company || "",
@@ -4239,7 +4403,9 @@
         status: normalizeStatus(app.status),
         appliedAt: app.appliedAt || "",
         companyCategory: normalizeCompanyCategory(app.companyCategory),
-        jobType: jobTypes.includes(app.jobType) ? app.jobType : (jobTypes.includes("Graduate Programmes") ? "Graduate Programmes" : jobTypes[0]),
+        jobType: jobTypes.includes(app.jobType) || savedCustomLawJobTypes.includes(app.jobType)
+          ? app.jobType
+          : (jobTypes.includes("Graduate Programmes") ? "Graduate Programmes" : jobTypes[0]),
         url: app.url || "",
         notes: app.notes || "",
         roleNotes: app.roleNotes || "",
@@ -4591,11 +4757,18 @@
       updateDeadlineSuggestion();
       const categoryValue = app.companyCategory ? normalizeCompanyCategory(app.companyCategory) : "";
       const knownCategory = companyCategories.some(category => category.toLowerCase() === categoryValue.toLowerCase());
-      const freeTextCategory = activeTracker === "law";
-      document.querySelector("#categoryInput").value = freeTextCategory ? "" : (knownCategory ? categoryValue : (categoryValue ? "__custom__" : ""));
-      document.querySelector("#categoryTextInput").value = freeTextCategory || (categoryValue && !knownCategory) ? categoryValue : "";
+      document.querySelector("#categoryInput").value = knownCategory ? categoryValue : (categoryValue ? "__custom__" : "");
+      document.querySelector("#categoryTextInput").value = categoryValue && !knownCategory ? categoryValue : "";
       updateCustomCategoryVisibility();
-      document.querySelector("#jobTypeInput").value = app.jobType || activeJobType;
+      const jobTypeSelect = document.querySelector("#jobTypeInput");
+      const appJobType = app.jobType || activeJobType;
+      if (appJobType && ![...jobTypeSelect.options].some(option => option.value === appJobType)) {
+        const option = document.createElement("option");
+        option.value = appJobType;
+        option.textContent = appJobType;
+        jobTypeSelect.appendChild(option);
+      }
+      jobTypeSelect.value = appJobType;
       document.querySelector("#urlInput").value = app.url;
       document.querySelector("#notesInput").value = app.notes;
       renderStageEditor(app.stages);
@@ -4722,12 +4895,9 @@
         .filter(stage => stage.name);
 
       const selectedJobType = document.querySelector("#jobTypeInput").value.trim();
-      const lawCategory = activeTracker === "law";
       const customCategory = document.querySelector("#categoryInput").value === "__custom__";
       const typedCategory = document.querySelector("#categoryTextInput").value.trim();
-      const companyCategory = lawCategory
-        ? typedCategory
-        : addCompanyCategory(customCategory ? typedCategory : document.querySelector("#categoryInput").value);
+      const companyCategory = addCompanyCategory(customCategory ? typedCategory : document.querySelector("#categoryInput").value);
 
       const existingApp = editingId ? applications.find(item => item.id === editingId) : null;
       const targetAppId = editingId || crypto.randomUUID();
@@ -5301,7 +5471,7 @@
               }
             }
           }
-          if (activeTracker !== "law") applications.forEach(app => addCompanyCategory(app.companyCategory));
+          applications.forEach(app => addCompanyCategory(app.companyCategory));
           if (!persist()) throw new Error("Could not save imported tracker data");
           render();
         } catch {
