@@ -3325,6 +3325,7 @@ file to honour the single-file edit constraint.
       .tracker-switcher { position: relative; min-height: 114px; }
       .pages-nav-links {
         position: absolute; top: 8px; right: 16px;
+        z-index: 2;
         grid-area: auto; grid-column: auto; grid-row: auto;
         flex-direction: column; align-items: flex-end; gap: 0;
       }
@@ -3427,12 +3428,18 @@ file to honour the single-file edit constraint.
     .preparation-reorder-row [data-action="section-up"]:focus-visible, .preparation-reorder-row [data-action="section-down"]:focus-visible { position: static; width: auto; height: auto; clip-path: none; padding: 8px; }
     .preparation-bullet-button { justify-self: start; width: auto; padding: 5px 8px; background: #edf3f8; color: #1766a4; border-radius: 6px; font-size: 12px; font-weight: 650; }
     .preparation-bullet-button[hidden] { display: none; }
-    .preparation-answer-editor { width: 100%; min-height: 130px; resize: vertical; overflow: auto; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: white; color: #16243a; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .preparation-answer-editor { width: 100%; min-height: calc(4.5em + 26px); height: auto; resize: none; overflow: visible; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: white; color: #16243a; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; }
     .preparation-answer-editor:focus { outline: 3px solid #dce8f4; border-color: #5191c9; }
     .preparation-answer-editor:empty::before { content: attr(data-placeholder); color: #6b7280; pointer-events: none; }
     .preparation-answer-editor ul, .preparation-answer-editor ol { margin: 0; padding-left: 1.2em; }
     .preparation-answer-editor li { padding-left: .1em; }
-    .preparation-field textarea[hidden], .preparation-edit-form textarea[hidden] { display: none; }
+    .preparation-field textarea[hidden], .preparation-edit-form textarea[hidden], #detailView textarea[hidden], #notesInput[hidden] { display: none; }
+    .preparation-field:has(> #preparationEditForm:not([hidden])) > .preparation-question-heading { display: none; }
+    .preparation-field > .preparation-edit-form { margin: 0; padding: 0; border: 0; background: transparent; }
+    .preparation-item:has(> #preparationEditForm:not([hidden])) > .preparation-menu-toggle { display: none; }
+    .preparation-item:has(> #preparationEditForm:not([hidden])) > details > summary { display: none; }
+    .preparation-item:has(> #preparationEditForm:not([hidden])) > details:not([open]) { display: none; }
+    .preparation-item > .preparation-edit-form { margin: 0 0 14px; }
   </style>
 </head>
 <body>
@@ -4492,8 +4499,8 @@ file to honour the single-file edit constraint.
     }
     function preparationValues() { return { version: 2, sections: preparationSections }; }
     function savePreparationNotes(manual = false) {
-      try { localStorage.setItem(trackerPreparationKey(activeTracker), JSON.stringify(preparationValues())); document.querySelector("#preparationSaveStatus").textContent = ""; }
-      catch { document.querySelector("#preparationSaveStatus").textContent = "Your latest notes could not be saved. Use More options → Export backup before closing this page."; }
+      try { localStorage.setItem(trackerPreparationKey(activeTracker), JSON.stringify(preparationValues())); document.querySelector("#preparationSaveStatus").textContent = ""; return true; }
+      catch { document.querySelector("#preparationSaveStatus").textContent = "Your latest notes could not be saved. Use More options → Export backup before closing this page."; return false; }
     }
     function enhancePreparationAnswer(field) {
       if (field.nextElementSibling?.classList.contains("preparation-answer-editor")) return;
@@ -4502,8 +4509,8 @@ file to honour the single-file edit constraint.
       editor.contentEditable = "true";
       editor.setAttribute("role", "textbox"); editor.setAttribute("aria-multiline", "true");
       const label = document.querySelector(`label[for="${field.id}"]`);
-      editor.setAttribute("aria-label", label?.textContent || field.getAttribute("aria-label") || "Answer");
-      editor.dataset.placeholder = "Write your notes here…";
+      editor.setAttribute("aria-label", label?.textContent || field.getAttribute("aria-label") || ({ roleNotesInput: "Role Notes", interviewNotesInput: "Interview Notes", outcomeNotesInput: "Offer / Rejection Notes", snapshotNotesInput: "Application Snapshot notes", notesInput: "Notes" })[field.id] || "Answer");
+      editor.dataset.placeholder = field.placeholder || "Write your notes here…";
       let list = null;
       if (field.value) field.value.split("\n").forEach(line => {
         if (line.startsWith("• ")) {
@@ -4531,6 +4538,59 @@ file to honour the single-file edit constraint.
           const range = document.createRange(); range.selectNodeContents(editor.querySelector("li")); range.collapse(true);
           const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range); syncAnswer();
         }
+      });
+      function placePreparationCaret(node) {
+        const range = document.createRange(); range.selectNodeContents(node); range.collapse(true);
+        const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+      }
+      function handlePreparationEditing(event, action) {
+        if (event.isComposing) return;
+        const selection = window.getSelection();
+        if (!selection.rangeCount || !editor.contains(selection.anchorNode)) return;
+        const range = selection.getRangeAt(0);
+        let element = range.startContainer.nodeType === Node.ELEMENT_NODE ? range.startContainer : range.startContainer.parentElement;
+        const item = element.closest("li");
+        if (action === "backspace" || (action === "enter" && item && !item.textContent.trim() && range.collapsed)) {
+          if (!item || !range.collapsed) return;
+          const prefix = document.createRange(); prefix.selectNodeContents(item); prefix.setEnd(range.startContainer, range.startOffset);
+          if (prefix.toString().length) return;
+          event.preventDefault();
+          const list = item.parentElement;
+          const remainder = document.createElement(list.tagName);
+          while (item.nextSibling) remainder.append(item.nextSibling);
+          const paragraph = document.createElement("div");
+          while (item.firstChild) paragraph.append(item.firstChild);
+          if (!paragraph.childNodes.length) paragraph.append(document.createElement("br"));
+          list.after(paragraph); if (remainder.childNodes.length) paragraph.after(remainder);
+          item.remove(); if (!list.children.length) list.remove();
+          placePreparationCaret(paragraph); syncAnswer(); return;
+        }
+        event.preventDefault(); range.deleteContents();
+        let block = item;
+        if (!block) {
+          block = element;
+          while (block !== editor && block.parentElement !== editor) block = block.parentElement;
+        }
+        const tailRange = document.createRange(); tailRange.selectNodeContents(block);
+        tailRange.setStart(range.startContainer, range.startOffset);
+        const tail = tailRange.extractContents();
+        const nextItem = document.createElement("li"); nextItem.append(tail);
+        if (!nextItem.textContent && !nextItem.querySelector("br")) nextItem.append(document.createElement("br"));
+        if (item) item.after(nextItem);
+        else {
+          const nextList = document.createElement("ul"); nextList.append(nextItem);
+          if (block === editor) editor.append(nextList); else block.after(nextList);
+        }
+        if (block !== editor && !block.textContent && !block.querySelector("br")) block.append(document.createElement("br"));
+        placePreparationCaret(nextItem); syncAnswer();
+      }
+      editor.addEventListener("keydown", event => {
+        if (event.key === "Enter") handlePreparationEditing(event, "enter");
+        else if (event.key === "Backspace") handlePreparationEditing(event, "backspace");
+      });
+      editor.addEventListener("beforeinput", event => {
+        if (["insertParagraph", "insertLineBreak"].includes(event.inputType)) handlePreparationEditing(event, "enter");
+        else if (event.inputType === "deleteContentBackward") handlePreparationEditing(event, "backspace");
       });
       editor.addEventListener("input", syncAnswer);
       editor.addEventListener("paste", event => {
@@ -4580,6 +4640,12 @@ file to honour the single-file edit constraint.
         const details = [...preparationList.querySelectorAll("[data-section]")].find(item => item.dataset.section === sectionId).querySelector("details");
         details.open = true;
         details.insertBefore(form, details.querySelector(".preparation-add-question"));
+      } else if (action === "rename-section") {
+        const holder = [...preparationList.querySelectorAll(".preparation-item")].find(item => item.dataset.section === sectionId);
+        holder.prepend(form);
+      } else if (action === "edit-question") {
+        const holder = [...preparationList.querySelectorAll("[data-question]")].find(item => item.dataset.question === questionId);
+        holder.prepend(form);
       } else preparationWorkspace.insertBefore(form, preparationList);
       form.hidden = false; input.focus(); input.select();
     }
@@ -4735,10 +4801,12 @@ file to honour the single-file edit constraint.
     document.addEventListener("click", event => { if (!event.target.closest(".preparation-menu,.preparation-menu-toggle")) closePreparationMenus(); });
     document.addEventListener("keydown", event => { if (event.key === "Escape") { closePreparationMenus(); document.querySelector("#preparationEditForm").hidden = true; } });
     loadPreparationNotes();
-    document.querySelector("#preparationSaveBtn").addEventListener("click", () => savePreparationNotes(true));
-    document.querySelector("#preparationNavBtn").addEventListener("click", () => showView("preparation"));
+    document.querySelector("#preparationSaveBtn").addEventListener("click", () => {
+      if (savePreparationNotes(true)) { showView("tracker"); window.scrollTo(0, 0); }
+    });
+    document.querySelector("#preparationNavBtn").addEventListener("click", () => showView(activeView === "preparation" ? "tracker" : "preparation"));
     document.querySelector("#preparationBackBtn").addEventListener("click", () => showView("tracker"));
-    document.querySelector("#resourcesNavBtn").addEventListener("click", () => showView("resources"));
+    document.querySelector("#resourcesNavBtn").addEventListener("click", () => showView(activeView === "resources" ? "tracker" : "resources"));
     document.querySelector("#backToTrackerFromResourcesBtn").addEventListener("click", () => showView("tracker"));
     document.querySelector("#calendarNavBtn").addEventListener("click", () => {
       if (activeView === "calendar") showView("tracker");
@@ -5812,7 +5880,10 @@ file to honour the single-file edit constraint.
       }
       jobTypeSelect.value = appJobType;
       document.querySelector("#urlInput").value = app.url;
-      document.querySelector("#notesInput").value = app.notes;
+      const applicationNotesField = document.querySelector("#notesInput");
+      applicationNotesField.value = app.notes;
+      if (applicationNotesField.nextElementSibling?.classList.contains("preparation-answer-editor")) applicationNotesField.nextElementSibling.remove();
+      enhancePreparationAnswer(applicationNotesField);
       renderStageEditor(app.stages);
       lockPageScroll();
       modal.classList.add("open");
@@ -6072,10 +6143,12 @@ file to honour the single-file edit constraint.
     }
 
     function showView(view) {
+      const returningFromDetails = activeView === "detail" && view === "tracker";
       activeView = view;
       document.querySelectorAll(".view").forEach(element => element.classList.remove("active"));
       if (view === "tracker") {
         document.querySelector("#trackerView").classList.add("active");
+        if (returningFromDetails) { detailId = null; render(); }
       }
       if (view === "detail") {
         document.querySelector("#detailView").classList.add("active");
@@ -6215,6 +6288,10 @@ file to honour the single-file edit constraint.
         </div>
       `;
       document.querySelector("#snapshotNotesInput").addEventListener("input", autosaveDetails);
+      [roleNotesField, interviewNotesField, outcomeNotesField, document.querySelector("#snapshotNotesInput")].forEach(field => {
+        if (field.nextElementSibling?.classList.contains("preparation-answer-editor")) field.nextElementSibling.remove();
+        enhancePreparationAnswer(field);
+      });
       document.querySelector("#detailStatusBtn").addEventListener("click", () => cycleApplicationStatus(app.id));
       renderChecklist(false);
       renderDocument("cv", "#cvDocument");
