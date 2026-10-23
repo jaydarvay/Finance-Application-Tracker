@@ -3440,6 +3440,7 @@ file to honour the single-file edit constraint.
     .preparation-item:has(> #preparationEditForm:not([hidden])) > details > summary { display: none; }
     .preparation-item:has(> #preparationEditForm:not([hidden])) > details:not([open]) { display: none; }
     .preparation-item > .preparation-edit-form { margin: 0 0 14px; }
+    .example-prep-arrow { float: right; margin-left: 8px; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -4000,13 +4001,13 @@ file to honour the single-file edit constraint.
     "id": "9a4bb421-9cd6-48b0-bff9-f3d5790ba10c",
     "company": "Example Firm",
     "role": "M&A Analyst",
-    "deadline": "2026-10-28",
+    "deadline": "2026-10-31",
     "priority": "Medium",
     "status": "In progress",
     "appliedAt": "2026-10-01",
     "companyCategory": "Bulge Bracket",
     "url": "",
-    "notes": "Add things you need to remember for the role. Salary, recruiter email, etc...",
+    "notes": "Use this column for key details, such as salary, location and recruiter contact information.",
     "roleNotes": "",
     "interviewNotes": "",
     "outcomeNotes": "",
@@ -4047,7 +4048,7 @@ file to honour the single-file edit constraint.
     "appliedAt": "2026-09-28",
     "companyCategory": "Middle Market",
     "url": "https://www.linkedin.com/in/jaydarvay/",
-    "notes": "Paste in the job description link, and it shows up as a hyperlink here.",
+    "notes": "Paste in the job description URL when creating or editing an application, then open it here ↑",
     "roleNotes": "",
     "interviewNotes": "",
     "outcomeNotes": "",
@@ -4086,13 +4087,13 @@ file to honour the single-file edit constraint.
     "id": "00b20af7-88c2-4e3d-b69c-06d00d944dda",
     "company": "Example Capital Partners",
     "role": "Private Equity Analyst",
-    "deadline": "2026-10-25",
+    "deadline": "2026-10-28",
     "priority": "High",
     "status": "In progress",
     "appliedAt": "2026-09-29",
     "companyCategory": "Buy-Side",
     "url": "https://www.linkedin.com/in/jaydarvay/",
-    "notes": "Example: Revise financial modelling basics for the technical interview. Use the job description link above to refresh the company values.",
+    "notes": "Use 'Interview Prep, Notes & More' → to prepare for the technical interview.",
     "roleNotes": "",
     "interviewNotes": "",
     "outcomeNotes": "",
@@ -4116,7 +4117,7 @@ file to honour the single-file edit constraint.
       },
       {
         "name": "HireVue",
-        "status": "todo"
+        "status": "done"
       },
       {
         "name": "Technical Interview",
@@ -4128,97 +4129,6 @@ file to honour the single-file edit constraint.
       }
     ],
     "updatedAt": 1790888885469
-  },
-  {
-    "id": "581d1e24-e758-4031-bf79-25b7f014478c",
-    "company": "Example Asset Management",
-    "role": "Investment Analyst",
-    "deadline": "2026-10-31",
-    "priority": "Low",
-    "status": "In progress",
-    "appliedAt": "2026-09-22",
-    "companyCategory": "Asset Management",
-    "url": "",
-    "notes": "",
-    "roleNotes": "",
-    "interviewNotes": "",
-    "outcomeNotes": "",
-    "prepChecklist": [
-      {
-        "text": "Researched firm",
-        "done": false
-      },
-      {
-        "text": "Prepared answers",
-        "done": false
-      }
-    ],
-    "documents": {},
-    "stages": [
-      {
-        "name": "CV Screening",
-        "status": "done"
-      },
-      {
-        "name": "Online Assessments",
-        "status": "done"
-      },
-      {
-        "name": "HireVue",
-        "status": "done"
-      },
-      {
-        "name": "Technical Interview",
-        "status": "todo"
-      }
-    ],
-    "updatedAt": 1790888557924
-  },
-  {
-    "id": "b0fa60ea-f881-4cf2-beba-9bcc3a060a44",
-    "company": "Example Real Estate",
-    "role": "Real Estate Graduate",
-    "deadline": "2026-10-29",
-    "priority": "Medium",
-    "status": "Rejected",
-    "appliedAt": "2026-10-02",
-    "companyCategory": "Buy-Side",
-    "jobType": "Graduate Programmes",
-    "url": "",
-    "notes": "Rejections automatically get moved to the bottom",
-    "roleNotes": "",
-    "interviewNotes": "",
-    "outcomeNotes": "Rejected before the final interview.",
-    "prepChecklist": [
-      {
-        "text": "Researched firm",
-        "done": false
-      },
-      {
-        "text": "Prepared answers",
-        "done": false
-      }
-    ],
-    "documents": {},
-    "stages": [
-      {
-        "name": "CV Screening",
-        "status": "done"
-      },
-      {
-        "name": "HireVue",
-        "status": "done"
-      },
-      {
-        "name": "Technical Interview",
-        "status": "done"
-      },
-      {
-        "name": "Final Interview",
-        "status": "todo"
-      }
-    ],
-    "updatedAt": 1790950800000
   }
 ];
 
@@ -5423,6 +5333,12 @@ file to honour the single-file edit constraint.
 
     function applyRequestedUpdates(apps) {
       let changed = false;
+      for (const app of apps) {
+        if (app.company === "Example Capital Partners" && app.notes === "Use the 'Interview Prep, Notes & More' → section to prepare for the technical interview.") {
+          app.notes = "Use 'Interview Prep, Notes & More' → to prepare for the technical interview.";
+          changed = true;
+        }
+      }
       // Migrate the original Finance sample deadlines once in existing browser data.
       const sampleDeadlineMigrationKey = `${storageKey}-sample-deadlines-v1`;
       if (!localStorage.getItem(sampleDeadlineMigrationKey)) {
@@ -5489,6 +5405,19 @@ file to honour the single-file edit constraint.
           }
         }
         saveToBrowserStorage(sampleDeadlineMigrationV4Key, "done");
+      }
+      const exampleRefreshKey = `${storageKey}-example-refresh-oct23-v1`;
+      if (activeTracker === "finance" && !localStorage.getItem(exampleRefreshKey)) {
+        for (const app of apps) {
+          if (app.id === "9a4bb421-9cd6-48b0-bff9-f3d5790ba10c" && app.company === "Example Firm" && app.deadline === "2026-10-28") { app.deadline = "2026-10-31"; changed = true; }
+          if (app.id === "00b20af7-88c2-4e3d-b69c-06d00d944dda" && app.company === "Example Capital Partners") {
+            if (app.deadline === "2026-10-25") { app.deadline = "2026-10-28"; changed = true; }
+            const hirevue = app.stages.find(stage => stage.name === "HireVue");
+            if (hirevue && hirevue.status !== "done") { hirevue.status = "done"; changed = true; }
+            if (app.notes.startsWith("Example: Revise financial modelling basics")) { app.notes = "Use 'Interview Prep, Notes & More' → to prepare for the technical interview."; changed = true; }
+          }
+        }
+        saveToBrowserStorage(exampleRefreshKey, "done");
       }
       return changed;
     }
@@ -5761,7 +5690,10 @@ file to honour the single-file edit constraint.
 
     function buildNotesHtml(app) {
       const link = app.url ? `<a href="${escapeAttribute(app.url)}" target="_blank" rel="noopener">Job Description</a>` : "";
-      const notes = app.notes ? escapeHtml(app.notes) : "";
+      let notes = app.notes ? escapeHtml(app.notes) : "";
+      if (app.notes === "Use 'Interview Prep, Notes & More' → to prepare for the technical interview.") {
+        notes = `<span class="example-prep-arrow" aria-hidden="true">→</span>Use '<strong>Interview Prep, Notes &amp; More</strong>' to prepare for the technical interview.`;
+      }
       return `${link}${link && notes ? "<br>" : ""}${notes}`;
     }
 
