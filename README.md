@@ -10,16 +10,6 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/). If you have any
 
 ## Features
 
-- **Any industry:** Use Finance, Tech or Engineering, or customise ‘Other’ for your industry.
-- **Track applications:** Input company details, roles, deadlines, notes, documents (CV, CL) and application stages.
-- **Stay organised:** Search and filter applications, sort by deadline or other details, and collapse and expand company categories using the +/- controls.
-- **Deadline Calendar:** View your deadlines and next stages in a calendar view, colour-coded by urgency.
-- **Prepare for interviews:** Keep job description links, notes, checklists, and the CV and cover letter used for each application together.
-- **Useful Resources:** Find links to career support and content from professionals in the careers space.
-- **Manage your data:** Add, edit, delete, import, export, or reset applications.
-
-## Features
-
 - **Any industry:** Use Finance, Tech or Engineering, or customise 'Other' for your industry.
 - **Application tracking:** Add applications and track their stages, deadlines and outcomes.
 - **Deadline Calendar:** See deadlines in a calendar view, colour-coded by urgency.
