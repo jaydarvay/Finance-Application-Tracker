@@ -4,7 +4,7 @@ A browser-based application tracker for keeping job applications, deadlines, int
 
 **[Open NextStep Tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)** (laptop or desktop use is recommended)
 
-Video tutorial on YouTube: https://youtu.be/gzB-M4gWSu4 (New features have been added since recording)
+Video tutorial on YouTube: https://youtu.be/gzB-M4gWSu4 (new features have been added since recording)
 
 Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/). If you have any questions, feel free to reach out.
 
