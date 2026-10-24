@@ -4,19 +4,29 @@ A browser-based application tracker for keeping job applications, deadlines, int
 
 **[Open NextStep Tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)** (laptop or desktop use is recommended)
 
-Video tutorial on YouTube: https://youtu.be/gzB-M4gWSu4
+Video tutorial on YouTube: https://youtu.be/gzB-M4gWSu4 (New features have been added since recording)
 
 Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/). If you have any questions, feel free to reach out.
 
 ## Features
 
-- **Four trackers:** Finance, Tech, Engineering, and Law.
+- **Any industry:** Use Finance, Tech or Engineering, or customise ‘Other’ for your industry.
 - **Track applications:** Input company details, roles, deadlines, notes, documents (CV, CL) and application stages.
 - **Stay organised:** Search and filter applications, sort by deadline or other details, and collapse and expand company categories using the +/- controls.
 - **Deadline Calendar:** View your deadlines and next stages in a calendar view, colour-coded by urgency.
 - **Prepare for interviews:** Keep job description links, notes, checklists, and the CV and cover letter used for each application together.
 - **Useful Resources:** Find links to career support and content from professionals in the careers space.
 - **Manage your data:** Add, edit, delete, import, export, or reset applications.
+
+## Features
+
+- **Any industry:** Use Finance, Tech or Engineering, or customise 'Other' for your industry.
+- **Application tracking:** Add applications and track their stages, deadlines and outcomes.
+- **Deadline Calendar:** See deadlines in a calendar view, colour-coded by urgency.
+- **Application notes and documents:** Keep notes, checklists, job description links, CVs and cover letters together for each application.
+- **Preparation Notes:** Prepare interview answers, assessment centre notes and more with editable questions and sections.
+- **Search, filter and sort:** Find applications quickly and prioritise what’s next.
+- **Automatic saving and backups:** Changes save in your browser. Export a backup or import your data on another device.
 
 ## Getting started
 
