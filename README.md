@@ -1,6 +1,6 @@
 # 📊 NextStep Tracker
 
-A browser-based application tracker for keeping job applications, deadlines, interview stages, preparation notes, and documents organised.
+A browser-based application tracker for keeping your job applications, deadlines, interview stages, preparation notes, and documents organised.
 
 **[Open NextStep Tracker](https://jaydarvay.github.io/Finance-Application-Tracker/)** (laptop or desktop use is recommended)
 
