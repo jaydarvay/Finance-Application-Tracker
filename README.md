@@ -12,8 +12,8 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/). If you have any
 
 - **Any industry:** Use Finance, Tech or Engineering, or customise 'Other' for your industry.
 - **Application tracking:** Add applications and track their stages, deadlines and outcomes.
-- **Deadline Calendar:** See deadlines in a calendar view, colour-coded by urgency.
 - **Application notes and documents:** Keep notes, checklists, job description links, CVs and cover letters together for each application.
+- **Deadline Calendar:** See deadlines in a calendar view, colour-coded by urgency.
 - **Preparation Notes:** Prepare interview answers, assessment centre notes and more with editable questions and sections.
 - **Search, filter and sort:** Find applications quickly and prioritise what’s next.
 - **Automatic saving and backups:** Changes save in your browser. Export a backup or import your data on another device.
