@@ -21,7 +21,7 @@ Created by [Jay Darvay](https://www.linkedin.com/in/jaydarvay/). If you have any
 ## Getting started
 
 1. Open the tracker using the link above.
-2. Choose a tracker.
+2. Choose a tracker: Finance, Tech, Engineering or Other.
 3. Delete the example applications and add your own.
 4. **Bookmark** the link for easy access.
 5. **Your changes save automatically in your browser on your computer.**
